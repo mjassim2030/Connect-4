@@ -1,0 +1,64 @@
+/*-------------------------------- Element Selectors --------------------------------*/
+* {
+    box-sizing: content-box;
+}
+
+body {
+    background-color: gainsboro;
+    /* Use a system font, if none are available use an available sans-sarif */
+    font-family: system-ui, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding-top: 30px;
+    background-image: url('../images/back.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    user-select: none;
+}
+
+h1 {
+    color: #2b7072;
+}
+
+/*-------------------------------- Class Selectors --------------------------------*/
+.board {
+    display: flex;
+    width: 40%;
+    margin: 20px auto;
+    border: 3px solid #0057B7;
+    background-color: #0057B7;
+    border-radius: 10px;
+    justify-content: center;
+}
+
+/* ------------------------------------------ */
+.column {
+    width: 20%;
+    border-radius: 5px;
+    text-align: center;
+    border: 3px dashed #0057B7;
+}
+
+.column:hover {
+    animation: animateBorder 0.3s ease-in-out forwards;
+}
+
+.cell {
+    display: flex;
+    aspect-ratio: 1/1;
+    border: 3px solid #0057B7;
+    border-radius: 60px;
+    font-size: 64px;
+    text-align: center;
+    background-color: #dcdcdc;
+}
+
+@keyframes animateBorder {
+    from {
+        border: 3px dashed #0057B7;
+    }
+
+    to {
+        border: 3px dashed #ff6773;
+    }
+}
