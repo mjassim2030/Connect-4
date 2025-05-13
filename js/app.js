@@ -23,24 +23,49 @@
 // 5- There should be a visual animated pop up showing the final results (ex. Red (0) - Blue (0))
 // 6- The winning combination should be highlighted in different color, with swinging animation.
 
+/* To Do
+
+    // [X] Ask user to choose board size
+    // [ ] Choose Player vs Computer or Playre vs Player
+    // [ ] Check winner
+    // [ ] initaite winner an tie variable as false
+    // [ ] Clear Wining Combo
+    // [ ] Configure Back Sound
+    // [ ] Render Messages
+*/
 /*-------------------------------- Constants --------------------------------*/
-const numberOfColumns = 7;
-const numberOfRows = 6;
-let gameGrid = [];
+const boardSizes = [
+    [4,5],
+    [5,6],
+    [6,7],
+    [7,8],    
+]
+
 let emptyGameGrid = [];
 let emptyRow = [];
-let html = '';
-let turn;
 
 /*------------------------ Cached Element References ------------------------*/
 const boardElement = document.querySelector('.board');
-// const cellElement = document.querySelectorAll('.cell');
-
+const boardSizeElement = document.querySelectorAll('.boardSize')
+const messageElement = document.querySelector('.message')
 /*-------------------------------- Variables --------------------------------*/
-
-
-
+let selectedBoardSize = []
+let rows = 0;
+let columns = 0;
+let gameGrid = [];
+let html = '';
+let turn;
 /*-------------------------------- Functions --------------------------------*/
+
+const selectBoardSize = (e) => {
+
+    selectedBoardSize = boardSizes[e.target.id.slice(5)]
+    messageElement.style.display = 'none';
+    rows = selectedBoardSize[0]
+    columns = selectedBoardSize[1]
+    init(rows, columns);
+
+}
 
 // Budiling the grid of rows and columns with empty strings
 const buildGrid = (rows, columns) => {
@@ -85,8 +110,6 @@ const dropToken = (column) => {
             return row
         }
     }
-
-
 };
 
 const updateBoard = () => {
@@ -112,18 +135,17 @@ const checkForWinner = (row, col) => {
     ];
 
     const isValid = (r, c) =>
-        r >= 0 && r < numberOfRows && c >= 0 && c < numberOfColumns;
+        r >= 0 && r < rows && c >= 0 && c < columns;
 
     let winningCombos = [];
     emptyGameGrid[row][col] = "#";
 
     directions.forEach(([dr, dc]) => {
-        let count = 1;
         let temp = [[row, col]]
 
         // console.log(dr, dc)
         // Check forward
-        for (let i = 1; i <= numberOfColumns * numberOfRows; i++) {
+        for (let i = 1; i <= rows * columns; i++) {
             const r = row + dr * i;
             const c = col + dc * i;
 
@@ -133,7 +155,7 @@ const checkForWinner = (row, col) => {
             temp.push([r, c])
         }
 
-        for (let i = 1; i <= numberOfColumns * numberOfRows; i++) {
+        for (let i = 1; i <= rows * columns; i++) {
             const r = row - dr * i;
             const c = col - dc * i;
             if (!isValid(r, c) || gameGrid[r][c] !== player) break;
@@ -145,12 +167,7 @@ const checkForWinner = (row, col) => {
             temp.forEach(el => {
                 winningCombos.push(el);
             });
-            // console.log(temp.length)
-            // console.log(winningCombos)
         }
-
-
-
 
     });
 
@@ -164,7 +181,6 @@ const checkForWinner = (row, col) => {
         });
 
     }
-    // console.log("Grid:", emptyGameGrid)
 
 };
 
@@ -182,9 +198,10 @@ const switchTokens = () => {
 
 const handleClick = (e) => {
 
-    // console.log(e.target.classList.contains("cell"))
-    // if (!e.target.classList.contains("column") || !e.target.classList.contains("cell")) return
+    // if (!e.target.classList.contains("column") || !e.target.parentElement.classList.contains("column")) return
+    
     let tokenColumn = null;
+
     if (e.target.classList.contains("column")) {
         tokenColumn = e.target.classList[1].slice(3);
     } else if (e.target.parentElement.classList.contains("column")) {
@@ -192,38 +209,19 @@ const handleClick = (e) => {
     }
 
     const tokenRow = dropToken(tokenColumn)
-    //console.log(tokenRow)
     checkForWinner(tokenRow, Number(tokenColumn));
     switchTokens()
-
-
-}
-
-const init = () => {
-    buildGrid(numberOfRows, numberOfColumns);
-    buildDOMElements(numberOfRows, numberOfColumns);
-    turn = "R"
-
-    // gameGrid[5] = ["R", "G", "R", "G", "G", "R", ""]
     updateBoard();
 
-    // Ask user to choose board size
-    // Choose Player vs Computer or Playre vs Player
-    // Check winner
-    // initaite winner an tie variable as false
-    // Clear Wining Combo
-    // Configure Back Sound
-    // Render Messages
 }
-init()
-//console.log(gameGrid)
 
-
-// gameGrid[1] = ["7", "8", "9", "10", "11", "12", "13"]
-// gameGrid[2] = ["14", "15", "16", "17", "18", "19", "20"]
-// gameGrid[3] = ["21", "22", "23", "24", "25", "26", "27"]
-// gameGrid[4] = ["28", "29", "30", "31", "32", "33", "34"]
-// gameGrid[5] = ["35", "36", "37", "38", "39", "40", "41"]
+const init = (rows, columns) => {
+    buildGrid(rows, columns);
+    buildDOMElements(rows, columns);
+    turn = "R"
+    updateBoard();
+}
 
 /*----------------------------- Event Listeners -----------------------------*/
 boardElement.addEventListener('click', handleClick)
+boardSizeElement.forEach(element => {element.addEventListener('click', selectBoardSize)});
