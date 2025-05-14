@@ -22,7 +22,7 @@ h1 {
 
 /*-------------------------------- Class Selectors --------------------------------*/
 .board {
-    display: flex;
+    display: none;
     width: 40%;
     margin: 20px auto;
     border: 3px solid #0057B7;
