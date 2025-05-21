@@ -250,6 +250,28 @@ const updateBoard = () => {
 
 };
 
+
+const dropTokenComputer = () => {
+    const avaliableColumns = [];
+
+    for (let col = 0; col < columns; col++) {
+        if (gameGrid[0][col] === "") {
+            avaliableColumns.push(col)
+        }
+    }
+
+    if (avaliableColumns.length === 0) return;
+
+    const randomColumn = avaliableColumns[Math.floor(Math.random() * avaliableColumns.length)];
+
+    const tokenRow = dropToken(randomColumn);
+    checkForWinner(tokenRow, randomColumn);
+    checkTie()
+    switchTokens()
+    updateBoard();
+    render();
+}
+
 // Check if the cell is valid in the grid rows and columns
 const validCell = (r, c) =>
     r >= 0 && r < rows && c >= 0 && c < columns;
@@ -326,6 +348,10 @@ const handleClick = (e) => {
         switchTokens()
         updateBoard();
         render();
+
+        if (computerAI && !winner && !tie && turn === platerTwoColor) {
+            setTimeout(dropTokenComputer, 500)
+        }
     }
 }
 
