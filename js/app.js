@@ -2,6 +2,63 @@
 
 /* To Do
 
+## Technical Requirements - MVP
+    [ ] Render the game in the browser using the DOM manipulation techniques demonstrated in lecture.
+    [ ] Include win/loss logic and render win/loss messages in HTML. The game you chose must have a win/lose condition.
+    [ ] Include separate HTML, CSS, JavaScript, and JavaScript data files organized in an appropriate file structure.
+    [ ] Include all required features specific to your game as defined in the Required
+        Features column in the table in the Recommended games document, or as
+        discussed with your instructor if doing a custom game.
+    [ ] The game is deployed online so the rest of the world can play it.
+
+ ## Code Convention Requirements
+    [ ] The game can be played without encountering errors. No errors may be present in
+        the console in the browser.
+    [ ] The code in the app adheres to coding conventions covered in lessons, like using
+        plural names for arrays.
+    [ ] There is no remaining dead and/or commented out code or console logs outside of
+        a commented out Code Graveyard section of your code.
+    [ ] The game may not utilize the prompt() or alert() methods.
+    [ ] The game is coded using proper indentation.
+
+## UI/UX Requirements
+
+    [X ] CSS Flexbox or Grid is used for page layout design
+    [ ] Instructions about how to play the game are included in your app.
+    [X] Colors used on the site have appropriate contrast that meet the WCAG 2.0 level AA standard.
+    [ ] All images on the site have alt text.
+    [ ] No text is placed on top of an image in a way that makes that text inaccessible.
+
+## Git and GitHub Requirements
+    [ ] You are shown as the only contributor to the project on GitHub.
+    [ ] The GitHub repository used for the project is named appropriately. For example,
+        names like connect-four or adventure-game are appropriate names, whereas
+        game-project or ga-project are not. The repo must be publicly accessible.
+    [ ] Frequent commits dating back to the very beginning of the project. If you start over
+        with a new repo, do not delete the old one.
+    [ ] Commit messages should be descriptive of the work done in the commit.
+
+## README Requirements
+    [ ] Screenshot/Logo: A screenshot of your app or a logo.
+    [ ] Your game's name: Include a description of your game and what it does.
+        Background info about the game and why you chose it is a nice touch.
+    [ ] Getting started: Include a link to your deployed game and any instructions you
+        deem important. This should also contain a link to your planning materials.
+    [ ] Attributions: This section should include links to any external resources (such as
+        libraries or assets) you used to develop your application that require attribution.
+        You can exclude this section if it does not apply to your application.
+    [ ] Technologies Used: List of the technologies used, for example: JavaScript, HTML,
+        CSS, etc.
+    [ ] Next steps: Planned future enhancements (stretch goals).
+
+## Presentation Requirements
+    [ ] Present your project in front of the class on the scheduled presentation day.
+    [ ] The project you present is the project you were approved by your instructor to
+        build.
+
+--------------------------------------------------
+
+
     # MVP
     [X] Ask user to choose board size
     [ ] Choose Player vs Computer or Playre vs Player - will be skipped in the mean time.
@@ -10,7 +67,7 @@
     [X] Winner is the first to have horizontal, vertical, or diagonal line of 4 tokens.
     [X] Check winner
     [X] Alternate turns
-    [ ] If all the game board is filled then its a tie
+    [X] If all the game board is filled then its a tie
     [ ] Skip non-Empty Columns
     [ ] Clear Wining Combo
     [ ] Configure Back Sound
@@ -32,13 +89,18 @@
     [ ] Dark mode
     */
 /*-------------------------------- Constants --------------------------------*/
+
+// Array to hold different board sizes by [row, column]
 const boardSizes = [
-    [4, 4],
+    [4, 5],
     [5, 6],
     [6, 7],
     [7, 8],
 ]
 
+
+// Array to hold directions in which the code will check 
+// if we have 4 simmilar tokens in row
 const directions = [
     [0, 1],
     [1, 0],
@@ -50,6 +112,8 @@ const directions = [
 const boardElement = document.querySelector('.board');
 const boardSizeElement = document.querySelectorAll('.boardSize')
 const messageElement = document.querySelector('.message')
+
+
 /*-------------------------------- Variables --------------------------------*/
 let selectedBoardSize = []
 let rows = 0;
@@ -60,10 +124,12 @@ let turn;
 let winner = false;
 let tie = false;
 let computerAI = false;
+
+
 /*-------------------------------- Functions --------------------------------*/
 
+// Callback function called when a board size selected on the start of the game
 const selectBoardSize = (e) => {
-
     selectedBoardSize = boardSizes[e.target.id.slice(5)]
     messageElement.style.display = 'none';
     boardSizeElement.forEach(element => { element.style.display = 'none'; });
@@ -74,8 +140,8 @@ const selectBoardSize = (e) => {
 
 }
 
-// Budiling the grid of rows and columns with empty strings
-const buildGrid = (rows, columns) => {
+// Construct grid of rows and columns with empty strings
+const constructGrid = (rows, columns) => {
     let emptyRow = [];
 
     for (let row = 0; row < rows; row++) {
@@ -88,12 +154,13 @@ const buildGrid = (rows, columns) => {
 
 };
 
-const buildDOMElements = (rows, columns) => {
+// Dynamically construct Document Object Model (DOM) elements
+// to ensure the game's flexibility and scalability.
+const constructDOMElements = (rows, columns) => {
 
     for (let col = 0; col < columns; col++) {
 
         html += `<div class="column col${col}">`;
-
         for (let row = 0; row < rows; row++) {
             html += `<div class="cell" id="col${col}_row${row}"></div>`
         }
@@ -101,8 +168,10 @@ const buildDOMElements = (rows, columns) => {
         boardElement.innerHTML += html;
         html = ""
     }
+
 };
 
+// Render messages on the UI
 const render = () => {
 
     if (!tie && winner) {
@@ -115,12 +184,13 @@ const render = () => {
 
 }
 
+// This function triggered when the user drops a token (Clicking on one the columns)
+// To place a token (Red or Green)
 const dropToken = (column) => {
-
-    //Check if the column has empty cells
 
     for (let row = gameGrid.length - 1; row >= 0; row--) {
 
+        //Check if the column has empty cells
         if (gameGrid[row][column] === "") {
             gameGrid[row][column] = turn
 
@@ -130,6 +200,9 @@ const dropToken = (column) => {
     }
 };
 
+
+// Check if we have tie situation 
+// when all grid cells are filled with tokens with no winner
 const checkTie = () => {
 
     const check = gameGrid.reduce((acc, value, index) => {
@@ -145,11 +218,11 @@ const checkTie = () => {
     }
 }
 
+// Update the Board corresponding locations with the dropped token color
 const updateBoard = () => {
     if (winner) return
     gameGrid.forEach((rows, row) => {
         rows.forEach((cells, column) => {
-            // console.log(row)
             document.getElementById(`col${column}_row${row}`).style.backgroundColor = cells === "R" ? "red" : cells === "G" ? "green" : "None";
 
         });
@@ -157,13 +230,14 @@ const updateBoard = () => {
 
 };
 
-const validDrop = (r, c) =>
+// Check if the cell is valid in the grid rows and columns
+const validCell = (r, c) =>
     r >= 0 && r < rows && c >= 0 && c < columns;
 
+// Check for winner by finding 4 in row simmilar tokens, either horizontally
+// Verticall, or Diagonaly
 const checkForWinner = (row, col) => {
     const token = gameGrid[row][col];
-
-
 
     let winningCombos = [];
 
@@ -174,14 +248,14 @@ const checkForWinner = (row, col) => {
             const r = row + dr * i;
             const c = col + dc * i;
 
-            if (!validDrop(r, c) || gameGrid[r][c] !== token) break;
+            if (!validCell(r, c) || gameGrid[r][c] !== token) break;
             temp.push([r, c])
         }
 
         for (let i = 1; i <= rows * columns; i++) {
             const r = row - dr * i;
             const c = col - dc * i;
-            if (!validDrop(r, c) || gameGrid[r][c] !== token) break;
+            if (!validCell(r, c) || gameGrid[r][c] !== token) break;
             temp.push([r, c])
         }
 
@@ -190,23 +264,18 @@ const checkForWinner = (row, col) => {
                 winningCombos.push(el);
             });
         }
-
     });
 
     if (winningCombos.length >= 4) {
-        console.log(`${token} is a Winner!`);
         winner = true
         winningCombos.forEach((ele) => {
-            console.log(`col${ele[1]}_row${ele[0]}`)
             document.getElementById(`col${ele[1]}_row${ele[0]}`).style.backgroundColor = "yellow";
         });
-
-
     }
-
 };
 
 
+// Switch token colors for next player move
 const switchTokens = () => {
     if (winner) return
 
@@ -219,9 +288,8 @@ const switchTokens = () => {
 
 };
 
+// Callback Function called when a column or cell is clicked
 const handleClick = (e) => {
-
-    // if (!e.target.classList.contains("column") || !e.target.parentElement.classList.contains("column")) return
 
     let tokenColumn = null;
 
@@ -230,18 +298,24 @@ const handleClick = (e) => {
     } else if (e.target.parentElement.classList.contains("column")) {
         tokenColumn = e.target.parentElement.classList[1].slice(3)
     }
-
-    const tokenRow = dropToken(tokenColumn)
-    checkForWinner(tokenRow, Number(tokenColumn));
-    checkTie()
-    switchTokens()
-    updateBoard();
-    render();
+    if (tokenColumn) {
+        const tokenRow = dropToken(tokenColumn)
+        
+        checkForWinner(tokenRow, Number(tokenColumn));
+        checkTie()
+        switchTokens()
+        updateBoard();
+        render();
+    }
 }
 
+// Initial fun function called upon selecting a board size, 
+// which will construct the grid of with empty strings,
+// and construct cells DOM elements on the HTML
+// It will also initialize the turn token color, and update the board data.
 const init = (rows, columns) => {
-    buildGrid(rows, columns);
-    buildDOMElements(rows, columns);
+    constructGrid(rows, columns);
+    constructDOMElements(rows, columns);
     turn = "R"
     updateBoard();
 }
