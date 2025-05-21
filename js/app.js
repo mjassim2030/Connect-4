@@ -62,7 +62,7 @@
     # MVP
     [X] Ask user to choose board size
     [ ] Choose Player vs Computer or Playre vs Player - will be skipped in the mean time.
-    [ ] Let the user choose color of token
+    [X] Let the user choose color of token
     [X] initaite winner and tie variable as false
     [X] Winner is the first to have horizontal, vertical, or diagonal line of 4 tokens.
     [X] Check winner
@@ -112,7 +112,9 @@ const directions = [
 const boardElement = document.querySelector('.board');
 const boardSizeElement = document.querySelectorAll('.boardSize')
 const messageElement = document.querySelector('.message')
-
+const redTokenElement = document.querySelector('#redToken')
+const greenTokenElement = document.querySelector('#greenToken')
+const tokenSelector = document.querySelector(".tokenSelector");
 
 /*-------------------------------- Variables --------------------------------*/
 let selectedBoardSize = []
@@ -124,7 +126,8 @@ let turn;
 let winner = false;
 let tie = false;
 let computerAI = false;
-
+let playerOneColor = 'R'
+let platerTwoColor = "G"
 
 /*-------------------------------- Functions --------------------------------*/
 
@@ -133,11 +136,17 @@ const selectBoardSize = (e) => {
     selectedBoardSize = boardSizes[e.target.id.slice(5)]
     messageElement.style.display = 'none';
     boardSizeElement.forEach(element => { element.style.display = 'none'; });
+    tokenSelector.style.display = 'flex';
+}
+
+const selectTokenColor = (e) => {
+    playerOneColor = e.target.innerText;
+    platerTwoColor = playerOneColor === "R" ? "G" : "R";
+    tokenSelector.style.display = 'none';
     boardElement.style.display = 'flex';
     rows = selectedBoardSize[0]
     columns = selectedBoardSize[1]
     init(rows, columns);
-
 }
 
 // Construct grid of rows and columns with empty strings
@@ -300,7 +309,7 @@ const handleClick = (e) => {
     }
     if (tokenColumn) {
         const tokenRow = dropToken(tokenColumn)
-        
+
         checkForWinner(tokenRow, Number(tokenColumn));
         checkTie()
         switchTokens()
@@ -316,10 +325,12 @@ const handleClick = (e) => {
 const init = (rows, columns) => {
     constructGrid(rows, columns);
     constructDOMElements(rows, columns);
-    turn = "R"
+    turn = playerOneColor
     updateBoard();
 }
 
 /*----------------------------- Event Listeners -----------------------------*/
 boardElement.addEventListener('click', handleClick)
 boardSizeElement.forEach(element => { element.addEventListener('click', selectBoardSize) });
+redTokenElement.addEventListener('click', selectTokenColor)
+greenTokenElement.addEventListener('click', selectTokenColor)
