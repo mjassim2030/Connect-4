@@ -116,6 +116,11 @@ const redTokenElement = document.querySelector('#redToken')
 const greenTokenElement = document.querySelector('#greenToken')
 const tokenSelector = document.querySelector(".tokenSelector");
 
+const versusPlayerElement = document.querySelector('#versusPlayer')
+const versusComputerElement = document.querySelector('#versusComputer')
+const modeSelector = document.querySelector(".modeSelector");
+
+
 /*-------------------------------- Variables --------------------------------*/
 let selectedBoardSize = []
 let rows = 0;
@@ -143,6 +148,12 @@ const selectTokenColor = (e) => {
     playerOneColor = e.target.innerText;
     platerTwoColor = playerOneColor === "R" ? "G" : "R";
     tokenSelector.style.display = 'none';
+    modeSelector.style.display = 'flex';
+}
+
+const selectGameMode = (e) => {
+    computerAI = (e.target.id === 'versusComputer')
+    modeSelector.style.display = 'none';
     boardElement.style.display = 'flex';
     rows = selectedBoardSize[0]
     columns = selectedBoardSize[1]
@@ -334,3 +345,7 @@ boardElement.addEventListener('click', handleClick)
 boardSizeElement.forEach(element => { element.addEventListener('click', selectBoardSize) });
 redTokenElement.addEventListener('click', selectTokenColor)
 greenTokenElement.addEventListener('click', selectTokenColor)
+versusPlayerElement.addEventListener('click', selectGameMode)
+versusComputerElement.addEventListener('click', selectGameMode)
+
+
