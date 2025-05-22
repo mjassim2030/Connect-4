@@ -3,9 +3,9 @@
 /* To Do
 
 ## Technical Requirements - MVP
-    [ ] Render the game in the browser using the DOM manipulation techniques demonstrated in lecture.
-    [ ] Include win/loss logic and render win/loss messages in HTML. The game you chose must have a win/lose condition.
-    [ ] Include separate HTML, CSS, JavaScript, and JavaScript data files organized in an appropriate file structure.
+    [X] Render the game in the browser using the DOM manipulation techniques demonstrated in lecture.
+    [X] Include win/loss logic and render win/loss messages in HTML. The game you chose must have a win/lose condition.
+    [X] Include separate HTML, CSS, JavaScript, and JavaScript data files organized in an appropriate file structure.
     [ ] Include all required features specific to your game as defined in the Required
         Features column in the table in the Recommended games document, or as
         discussed with your instructor if doing a custom game.
@@ -108,13 +108,24 @@ const directions = [
     [1, -1],
 ];
 
+const gameData = {
+    baordSize: [],
+    playerOneColor: 'R',
+    playerTwoColor: "G",
+    computerAI: false,
+}
+
 /*------------------------ Cached Element References ------------------------*/
 const boardElement = document.querySelector('.board');
+const screenElement = document.querySelector('.screen')
+
+
+
 const boardSizeElement = document.querySelectorAll('.boardSize')
-const messageElement = document.querySelector('.message')
 const redTokenElement = document.querySelector('#redToken')
 const greenTokenElement = document.querySelector('#greenToken')
 const tokenSelector = document.querySelector(".tokenSelector");
+
 
 const versusPlayerElement = document.querySelector('#versusPlayer')
 const versusComputerElement = document.querySelector('#versusComputer')
@@ -122,7 +133,6 @@ const modeSelector = document.querySelector(".modeSelector");
 
 
 /*-------------------------------- Variables --------------------------------*/
-let selectedBoardSize = []
 let rows = 0;
 let columns = 0;
 let gameGrid = [];
@@ -130,35 +140,56 @@ let html = '';
 let turn;
 let winner = false;
 let tie = false;
-let computerAI = false;
-let playerOneColor = 'R'
-let platerTwoColor = "G"
+let step = 0;
 
 /*-------------------------------- Functions --------------------------------*/
 
-// Callback function called when a board size selected on the start of the game
-const selectBoardSize = (e) => {
-    selectedBoardSize = boardSizes[e.target.id.slice(5)]
-    messageElement.style.display = 'none';
-    boardSizeElement.forEach(element => { element.style.display = 'none'; });
-    tokenSelector.style.display = 'flex';
+const showScreen = (message, buttonsText, icons, timer) => {
+    let screenContent = '';
+    screenElement.style.display = 'flex'
+    screenContent = `<p>${message}</p><div class="buttons">`
+    screenElement.innerHTML = "";
+    buttonsText.forEach((buttonText, index) => {
+        screenContent = screenContent + (icons ? "" : `<img src="${icons[index]}/>`) + `<button class="options" id="${index}">${buttonText}</button>`
+    });
+    screenContent += "</div>"
+
+    screenElement.innerHTML = screenContent;
+
+    if (timer) {
+        setTimeout(() => {
+            screenElement.style.display = 'none'
+        }, 3000)
+    }
+
 }
 
-const selectTokenColor = (e) => {
-    playerOneColor = e.target.innerText;
-    platerTwoColor = playerOneColor === "R" ? "G" : "R";
-    tokenSelector.style.display = 'none';
-    modeSelector.style.display = 'flex';
-}
+showScreen("Select your Game Mode", ['Player vs Player', 'Player vs Computer'], [], false)
 
-const selectGameMode = (e) => {
-    computerAI = (e.target.id === 'versusComputer')
-    modeSelector.style.display = 'none';
-    boardElement.style.display = 'flex';
-    rows = selectedBoardSize[0]
-    columns = selectedBoardSize[1]
-    init(rows, columns);
-}
+const screensCallBack = (e) => {
+
+    if (e.target.classList.contains("options")) {
+        if (step === 0) {
+            gameData.computerAI = (e.target.id === '1')
+            step++;
+            showScreen("Select Board Size", ['4x5', '5x6', '6x7', '7x8'], [], false)
+        } else if (step === 1) {
+            gameData.baordSize.push(e.target.innerText.split("x")[0], e.target.innerText.split("x")[1])
+            step++;
+            showScreen("Select your prefered token color", ['Red', 'Green'], [], false)
+        } else if (step === 2) {
+            gameData.playerOneColor = e.target.innerText === "Red" ? "R" : "G";
+            gameData.playerTwoColor = gameData.playerOneColor === "R" ? "G" : "R";
+            rows = gameData.baordSize[0]
+            columns = gameData.baordSize[1]
+            init(rows, columns);
+            step = 0;
+            screenElement.style.display = 'none'
+            boardElement.style.display = 'flex';
+        }
+    }
+
+};
 
 // Construct grid of rows and columns with empty strings
 const constructGrid = (rows, columns) => {
@@ -195,11 +226,9 @@ const constructDOMElements = (rows, columns) => {
 const render = () => {
 
     if (!tie && winner) {
-        messageElement.style.display = 'flex';
-        messageElement.innerText = `${turn} is a Winner!`
+        showScreen(`${turn} is a Winner!`, [], [], true)
     } else if (tie && !winner) {
-        messageElement.style.display = 'flex';
-        messageElement.innerText = `It's a Tie!`
+        showScreen(`It's a Tie!`, [], [], true)
     }
 
 }
@@ -250,27 +279,113 @@ const updateBoard = () => {
 
 };
 
-
-const dropTokenComputer = () => {
-    const avaliableColumns = [];
-
+const getAvailableColumns = () => {
+    const cols = [];
     for (let col = 0; col < columns; col++) {
         if (gameGrid[0][col] === "") {
-            avaliableColumns.push(col)
+            cols.push(col);
+        }
+    }
+    return cols;
+};
+
+// -----------------------------------------------------------------
+const wouldWin = (col, token) => {
+    // Copy grid
+    const tempGrid = gameGrid.map(row => [...row]);
+
+    // Drop the token in the simulated grid
+    for (let row = rows - 1; row >= 0; row--) {
+        if (tempGrid[row][col] === "") {
+            tempGrid[row][col] = token;
+            return checkWinSim(row, col, token, tempGrid);
         }
     }
 
-    if (avaliableColumns.length === 0) return;
+    return false;
+};
 
-    const randomColumn = avaliableColumns[Math.floor(Math.random() * avaliableColumns.length)];
+// const dropTokenComputer = () => {
+//     const avaliableColumns = [];
 
-    const tokenRow = dropToken(randomColumn);
-    checkForWinner(tokenRow, randomColumn);
-    checkTie()
-    switchTokens()
+//     for (let col = 0; col < columns; col++) {
+//         if (gameGrid[0][col] === "") {
+//             avaliableColumns.push(col)
+//         }
+//     }
+
+//     if (avaliableColumns.length === 0) return;
+
+//     const randomColumn = avaliableColumns[Math.floor(Math.random() * avaliableColumns.length)];
+
+//     const tokenRow = dropToken(randomColumn);
+//     checkForWinner(tokenRow, randomColumn);
+//     checkTie()
+//     switchTokens()
+//     updateBoard();
+//     render();
+// }
+
+const checkWinSim = (row, col, token, grid) => {
+    for (let [dr, dc] of directions) {
+        let count = 1;
+
+        // Forward
+        for (let i = 1; i < 4; i++) {
+            const r = row + dr * i;
+            const c = col + dc * i;
+            if (!validCell(r, c) || grid[r][c] !== token) break;
+            count++;
+        }
+
+        // Backward
+        for (let i = 1; i < 4; i++) {
+            const r = row - dr * i;
+            const c = col - dc * i;
+            if (!validCell(r, c) || grid[r][c] !== token) break;
+            count++;
+        }
+
+        if (count >= 4) return true;
+    }
+
+    return false;
+};
+
+const executeComputerMove = (col) => {
+    const tokenRow = dropToken(col);
+    checkForWinner(tokenRow, col);
+    checkTie();
+    switchTokens();
     updateBoard();
     render();
-}
+};
+
+const dropTokenComputer = () => {
+    const availableColumns = getAvailableColumns();
+
+    // 1. Try to win
+    for (let col of availableColumns) {
+        if (wouldWin(col, platerTwoColor)) {
+            executeComputerMove(col);
+            return;
+        }
+    }
+
+    // 2. Block player win
+    for (let col of availableColumns) {
+        if (wouldWin(col, playerOneColor)) {
+            executeComputerMove(col);
+            return;
+        }
+    }
+
+    // 3. Prefer center columns
+    const center = Math.floor(columns / 2);
+    const sortedCols = availableColumns.sort((a, b) => Math.abs(center - a) - Math.abs(center - b));
+    executeComputerMove(sortedCols[0]); // Best next move
+};
+//---------------------------------------------------------------------
 
 // Check if the cell is valid in the grid rows and columns
 const validCell = (r, c) =>
@@ -349,7 +464,7 @@ const handleClick = (e) => {
         updateBoard();
         render();
 
-        if (computerAI && !winner && !tie && turn === platerTwoColor) {
+        if (gameData.computerAI && !winner && !tie && turn === gameData.platerTwoColor) {
             setTimeout(dropTokenComputer, 500)
         }
     }
@@ -362,16 +477,18 @@ const handleClick = (e) => {
 const init = (rows, columns) => {
     constructGrid(rows, columns);
     constructDOMElements(rows, columns);
-    turn = playerOneColor
+    turn = gameData.playerOneColor
     updateBoard();
 }
 
 /*----------------------------- Event Listeners -----------------------------*/
 boardElement.addEventListener('click', handleClick)
-boardSizeElement.forEach(element => { element.addEventListener('click', selectBoardSize) });
-redTokenElement.addEventListener('click', selectTokenColor)
-greenTokenElement.addEventListener('click', selectTokenColor)
-versusPlayerElement.addEventListener('click', selectGameMode)
-versusComputerElement.addEventListener('click', selectGameMode)
+screenElement.addEventListener('click', screensCallBack)
+
+// boardSizeElement.forEach(element => { element.addEventListener('click', selectBoardSize) });
+// redTokenElement.addEventListener('click', selectTokenColor)
+// greenTokenElement.addEventListener('click', selectTokenColor)
+// versusPlayerElement.addEventListener('click', selectGameMode)
+// versusComputerElement.addEventListener('click', selectGameMode)
 
 

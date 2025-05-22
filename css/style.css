@@ -53,77 +53,43 @@ h1 {
     background-color: #dcdcdc;
 }
 
-
-.tokenSelector{
+.screen {
     position: absolute;
-left:38%;
-
-display: none;
-top: 30%;
-background-color: #0057B7;
-border-radius: 1rem;
-border: 0.5rem solid black;
-width: 23%;
-height: 25%;
-box-shadow: 0px 0px 10px #0057B7;
-text-align: center;
-vertical-align: middle;
-font-size: 2rem;
-color: white;
-justify-content: space-evenly;
-align-items: center;
-align-content: center;
+    left: 38%;
+    display: flex;
+    top: 30%;
+    background-color: #0057B7;
+    border-radius: 1rem;
+    border: 0.5rem solid black;
+    width: 23%;
+    height: 25%;
+    box-shadow: 0px 0px 10px #0057B7;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 2rem;
+    color: white;
+    justify-content: space-evenly;
+    align-items: center;
+    align-content: center;
+    flex-direction: column;
 }
 
-.modeSelector{
-    position: absolute;
-left:38%;
-
-display: none;
-top: 30%;
-background-color: #0057B7;
-border-radius: 1rem;
-border: 0.5rem solid black;
-width: 23%;
-height: 25%;
-box-shadow: 0px 0px 10px #0057B7;
-text-align: center;
-vertical-align: middle;
-font-size: 2rem;
-color: white;
-justify-content: space-evenly;
-align-items: center;
-align-content: center;
-}
-.message{
-position: absolute;
-left:38%;
-
-display: flex;
-top: 30%;
-background-color: #0057B7;
-border-radius: 1rem;
-border: 0.5rem solid black;
-width: 23%;
-height: 25%;
-box-shadow: 0px 0px 10px #0057B7;
-text-align: center;
-vertical-align: middle;
-font-size: 2rem;
-color: white;
-justify-content: space-evenly;
-align-items: center;
-align-content: center;
+.buttons {
+    display: flex;
+    width: 300px;
+    min-width: 300px;
+    justify-content: space-evenly;
+    height: 300px;
+    cursor: pointer;
+    flex-direction: row;
+    align-content: center;
+    padding-bottom: 12px;
 }
 
-.boardSize{
-background-color: #d5a572;
-display: block;
-width: 70px;
-height: 70px;
-cursor: pointer;
-align-content: center;
-}
+
+
+
+
 
 @keyframes animateBorder {
     from {
