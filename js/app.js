@@ -118,18 +118,7 @@ const gameData = {
 /*------------------------ Cached Element References ------------------------*/
 const boardElement = document.querySelector('.board');
 const screenElement = document.querySelector('.screen')
-
-
-
-const boardSizeElement = document.querySelectorAll('.boardSize')
-const redTokenElement = document.querySelector('#redToken')
-const greenTokenElement = document.querySelector('#greenToken')
-const tokenSelector = document.querySelector(".tokenSelector");
-
-
-const versusPlayerElement = document.querySelector('#versusPlayer')
-const versusComputerElement = document.querySelector('#versusComputer')
-const modeSelector = document.querySelector(".modeSelector");
+const animatedRedElement = document.getElementById("animatedRed")
 
 
 /*-------------------------------- Variables --------------------------------*/
@@ -147,13 +136,15 @@ let step = 0;
 const showScreen = (message, buttonsText, icons, timer) => {
     let screenContent = '';
     screenElement.style.display = 'flex'
-    screenContent = `<p>${message}</p><div class="buttons">`
     screenElement.innerHTML = "";
-    buttonsText.forEach((buttonText, index) => {
-        screenContent = screenContent + (icons ? "" : `<img src="${icons[index]}/>`) + `<button class="options" id="${index}">${buttonText}</button>`
-    });
-    screenContent += "</div>"
-
+    screenContent = `<p>${message}</p>`
+    if (buttonsText.length > 0) {
+        screenContent = screenContent + `<div class="buttons">`
+        buttonsText.forEach((buttonText, index) => {
+            screenContent = screenContent + (icons ? "" : `<img src="${icons[index]}/>`) + `<button class="options" id="${index}">${buttonText}</button>`
+        });
+        screenContent = screenContent + "</div>"
+    }
     screenElement.innerHTML = screenContent;
 
     if (timer) {
@@ -164,20 +155,24 @@ const showScreen = (message, buttonsText, icons, timer) => {
 
 }
 
-showScreen("Select your Game Mode", ['Player vs Player', 'Player vs Computer'], [], false)
+showScreen("Are you ready!", ['START GAME'], [], false)
 
 const screensCallBack = (e) => {
 
     if (e.target.classList.contains("options")) {
-        if (step === 0) {
+        if (step == 0) {
+            step++;
+            showScreen("Select your Game Mode", ['Player vs Player', 'Player vs Computer'], [], false)
+        }
+        if (step === 1) {
             gameData.computerAI = (e.target.id === '1')
             step++;
             showScreen("Select Board Size", ['4x5', '5x6', '6x7', '7x8'], [], false)
-        } else if (step === 1) {
+        } else if (step === 2) {
             gameData.baordSize.push(e.target.innerText.split("x")[0], e.target.innerText.split("x")[1])
             step++;
             showScreen("Select your prefered token color", ['Red', 'Green'], [], false)
-        } else if (step === 2) {
+        } else if (step === 3) {
             gameData.playerOneColor = e.target.innerText === "Red" ? "R" : "G";
             gameData.playerTwoColor = gameData.playerOneColor === "R" ? "G" : "R";
             rows = gameData.baordSize[0]
@@ -243,7 +238,33 @@ const dropToken = (column) => {
         if (gameGrid[row][column] === "") {
             gameGrid[row][column] = turn
 
-            document.getElementById(`col${column}_row${row}`).style.backgroundColor = turn === "R" ? "red" : "green";
+            const locatedCell = document.getElementById(`col${column}_row${row}`);
+            const rect = locatedCell.getBoundingClientRect();
+
+            animatedRedElement.style.width = `${rect.width}px`;
+            animatedRedElement.style.height = `${rect.height}px`;
+
+            animatedRedElement.style.display = 'flex';
+
+            animatedRedElement.style.top = 0;
+            animatedRedElement.style.left = `${rect.left + window.scrollX}px`;
+
+
+            setTimeout(() => {
+
+                animatedRedElement.style.top = `${rect.top + window.scrollY}px`;
+
+            }, 100)
+
+            setTimeout(() => {
+                locatedCell.style.backgroundColor = turn === "R" ? "red" : "green";
+                animatedRedElement.style.top = 0;
+                animatedRedElement.style.display = 'none';
+            }, 1000)
+
+
+
+
             return row
         }
     }
