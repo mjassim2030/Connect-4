@@ -4,7 +4,9 @@
 }
 
 body {
-    background-color: #0d0f2b;
+    background: url('../assets/images/back.png');
+    background-size: cover;
+    background-repeat: no-repeat;
     margin: 0;
     padding: 0;
     font-family: 'Orbitron', sans-serif;
@@ -14,24 +16,25 @@ body {
     justify-content: space-evenly;
     display: flex;
     flex-direction: column;
-
+    user-select: none;
 }
 
 h1 {
     color: #ffffff;
     animation: neon-glow 1s infinite alternate;
     text-align: center;
+    margin-top: 1rem;
+    margin-bottom: 0;;
 }
 
 /*-------------------------------- Class Selectors --------------------------------*/
 .board {
     display: none;
-    width: 40vw;
+    width: 35vw;
     margin: 20px auto;
-    border: 3px solid #0057B7;
-    background-color: #0057B7;
     border-radius: 10px;
     justify-content: center;
+    border: 3px solid #c043ff;
 }
 
 /* ------------------------------------------ */
@@ -39,43 +42,47 @@ h1 {
     width: 20%;
     border-radius: 5px;
     text-align: center;
-    border: 3px dashed #0057B7;
+    /* border: 3px solid #0d0f2b; */
 }
 
 .column:hover {
-    border: 3px solid #d3eb6c;
+    /* border: 3px solid #d3eb6c; */
+    background-color: rgba(210, 161, 248, 0.3);
         cursor: pointer;
 }
 
 .cell {
     display: flex;
     aspect-ratio: 1/1;
-    border: 3px solid #000000;
+    border: 3px solid rgb(192, 67, 255, 0.5);
     border-radius: 60px;
     font-size: 64px;
     text-align: center;
-    background-color: #0d0f2b;
+    background-size: cover;
+
+    /* background-color: #0d0f2b; */
 }
 
 #fallingTokens {
+    display: none;
     position: absolute;
     transition:
-        top 0.8s ease;
+    top 0.8s ease;
     opacity: 0.7;
+    z-index: -1;
 }
 
 .screen {
     position: absolute;
     width: auto;
     display: none;
-    top: 30%;
     background-color: #0057B7;
     border-radius: 1rem;
     border: 0.5rem solid black;
-    height: 25%;
+    height: 40%;
     background: radial-gradient(circle, #0d1b2a, #0b0f1a);
-    border: 2px solid #00f0ff;
-    box-shadow: 0 0 20px #00f0ff;
+    border: 2px solid #9103d7;
+    box-shadow: 0 0 20px #9103d7;
     padding: 30px;
     text-align: center;
     vertical-align: middle;
@@ -106,14 +113,15 @@ h1 {
 }
 
 .options {
-    border: 2px solid #00f0ff;
-    box-shadow: 0 0 10px #00f0ff, inset 0 0 10px #00f0ff;
-
+    border: 2px solid #9103d7;
+    box-shadow: 0 0 5px #9103d7, inset 0 0 5px #9103d7;
+    width: 5rem;
     border-radius: 0.8rem;
-    padding: 30px;
+    padding: 20px;
     cursor: pointer;
 
-    color: #00f0ff;
+    color: #b92dff;
+    font-size: 1rem;
     background-color: #0d1b2a;
     transition: background-color 0.5s ease;
     font-family: 'Orbitron', sans-serif;
@@ -122,19 +130,26 @@ h1 {
 
 .options:hover {
 
-    background-color: #00f0ff;
-    color: #0d1b2a;
+    background-color: #9103d7;
+    color: #ffffff;
 }
 
-.winCounter {
-    margin-top: 1rem;
+.colDiv{
+    display: flex;
+    flex-direction: row;
+    border-radius: 10px;
+    padding: 10px;
+    gap: 5px;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.bottomOptions {
+    display: none;
     text-align: center;
     font-family: 'Orbitron', sans-serif;
     font-size: 1.2rem;
-}
-
-#clearWins {
-    margin-left: 1rem;
-    padding: 5px 10px;
-    cursor: pointer;
+    color:white;
+    justify-content: space-between;
+    align-items: center;
 }

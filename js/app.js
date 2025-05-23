@@ -109,13 +109,15 @@ const directions = [
 ];
 
 const gameData = {
-    baordSize: [],
+    boardSize: [],
     playerOneColor: 'R',
     playerTwoColor: "G",
     computerAI: false,
     difficulty: 'easy',
     dropTokenFunction: '',
-    wins: 0
+    wins: 0,
+    alienImage: "../assets/images/alien.png",
+    astroImage: "../assets/images/astro.png"
 }
 
 /*------------------------ Cached Element References ------------------------*/
@@ -125,7 +127,12 @@ const fallingTokens = document.getElementById("fallingTokens")
 const clickSound = document.getElementById("clickSound");
 const startSound = document.getElementById("startSound");
 const tokenSound = document.getElementById("tokenSound");
+const winSound = document.getElementById("winSound");
 
+const winsText = document.getElementById("winsText");
+const clearBtn = document.getElementById("clearWins");
+const bottomOptions = document.querySelector(".bottomOptions");
+const resetBtn = document.getElementById('reset')
 /*-------------------------------- Variables --------------------------------*/
 let rows = 0;
 let columns = 0;
@@ -136,6 +143,7 @@ let winner = false;
 let tie = false;
 let step = 0;
 let allowMove = true
+let unlockNormalMode = 1;
 /*-------------------------------- Functions --------------------------------*/
 
 const showScreen = (message, buttonsText, icons, timer, nextStep) => {
@@ -146,11 +154,26 @@ const showScreen = (message, buttonsText, icons, timer, nextStep) => {
     if (buttonsText.length > 0) {
         screenContent = screenContent + `<div class="buttons">`
         buttonsText.forEach((buttonText, index) => {
-            screenContent = screenContent + (icons ? "" : `<img src="${icons[index]}/>`) + `<button onclick="playSound(1)" class="options" id="${index}">${buttonText}</button>`
+            if (gameData.computerAI && step === 2 && index === 1 && Number(gameData.wins) < unlockNormalMode) {
+                let comments = `</br></br>You have to win ${unlockNormalMode} time in easy mode, or vs player to unlock Normal Difficulty`;
+                screenContent += `
+        <button class="options" disabled style="width: 200px;">
+            ${buttonText}
+            ${comments}
+        </button>`;
+            } else {
+                screenContent += `
+        <button onclick="playSound(1)" class="options" id="${index}">
+            ${icons.length > 0 ? `<img class="options2" src="${icons[index]}" style="width: 4rem;"/>` : ''}
+            ${buttonText}
+        </button>`;
+            }
         });
         screenContent = screenContent + "</div>"
     }
     screenElement.innerHTML = screenContent;
+
+    step = nextStep
 
     if (timer) {
         setTimeout(() => {
@@ -158,21 +181,20 @@ const showScreen = (message, buttonsText, icons, timer, nextStep) => {
         }, 3000)
     }
 
-    step = nextStep
 
 }
 
 
 const screensCallBack = (e) => {
 
-    if (e.target.classList.contains("options")) {
+    if (e.target.classList.contains("options") || e.target.classList.contains("options2")) {
         if (step === 1) {
             showScreen("Select your Game Mode", ['Player vs Player', 'Player vs Computer'], [], false, 2)
         }
         else if (step === 2) {
             gameData.computerAI = (e.target.id === '1')
             if (gameData.computerAI) {
-                showScreen("Choose Diffculty Level", ['Easy', 'Normal'], [], false, 3)
+                showScreen("Choose Diffculty Level", ['Easy Mode', 'Normal Mode'], [], false, 3)
             } else {
                 showScreen("Select Board Size", ['4x5', '5x6', '6x7', '7x8'], [], false, 4)
             }
@@ -187,14 +209,16 @@ const screensCallBack = (e) => {
             step++;
             showScreen("Select Board Size", ['4x5', '5x6', '6x7', '7x8'], [], false, 4)
         } else if (step === 4) {
-            gameData.baordSize.push(e.target.innerText.split("x")[0], e.target.innerText.split("x")[1])
+            gameData.boardSize.push(e.target.innerText.split("x")[0], e.target.innerText.split("x")[1])
             step++;
-            showScreen("Select your prefered token color", ['Red', 'Green'], [], false, 5)
+            showScreen("Are you with us or with the Aliens!?", ['Aliens', 'Astrounts'], [gameData.alienImage, gameData.astroImage], false, 5)
         } else if (step === 5) {
-            gameData.playerOneColor = e.target.innerText === "Red" ? "R" : "G";
+            gameData.playerOneColor = e.target.innerText === "Aliens" ? "R" : "G";
             gameData.playerTwoColor = gameData.playerOneColor === "R" ? "G" : "R";
-            rows = gameData.baordSize[0]
-            columns = gameData.baordSize[1]
+            console.log(gameData.playerOneColor)
+
+            rows = gameData.boardSize[0]
+            columns = gameData.boardSize[1]
             init(rows, columns);
             step = 0;
             screenElement.style.display = 'none'
@@ -208,7 +232,7 @@ const screensCallBack = (e) => {
 // Construct grid of rows and columns with empty strings
 const constructGrid = (rows, columns) => {
     let emptyRow = [];
-
+    gameGrid = []
     for (let row = 0; row < rows; row++) {
         for (let col = 0; col < columns; col++) {
             emptyRow.push("");
@@ -222,7 +246,7 @@ const constructGrid = (rows, columns) => {
 // Dynamically construct Document Object Model (DOM) elements
 // to ensure the game's flexibility and scalability.
 const constructDOMElements = (rows, columns) => {
-
+    boardElement.innerHTML = "";
     for (let col = 0; col < columns; col++) {
 
         html += `<div class="column col${col}">`;
@@ -241,11 +265,13 @@ const render = () => {
 
     if (!tie && winner) {
         if (gameData.computerAI && gameData.playerOneColor === turn) {
+            playSound(4);
             showScreen(`You are the Winner!`, [], [], true)
             updateStorage()
         } else if (gameData.computerAI && gameData.playerTwoColor === turn)
             showScreen(`You Loose!`, [], [], true)
         else {
+            playSound(4);
             if (gameData.playerOneColor === turn) {
                 updateStorage()
             }
@@ -276,9 +302,12 @@ const dropToken = (column) => {
             const topCellRect = topLevelRow.getBoundingClientRect();
 
             fallingTokens.style.backgroundColor = turn === "R" ? "red" : "green";
-
+            fallingTokens.background = ''
             fallingTokens.style.width = `${locatedRect.width - 5}px`;
             fallingTokens.style.height = `${locatedRect.height - 5}px`;
+            fallingTokens.style.backgroundSize = "cover";
+
+            fallingTokens.style.backgroundImage = turn === "R" ? `url(${gameData.alienImage})` : `url(${gameData.astroImage})`
 
             fallingTokens.style.display = 'flex';
 
@@ -325,7 +354,7 @@ const updateBoard = () => {
     gameGrid.forEach((rows, row) => {
         rows.forEach((cells, column) => {
             document.getElementById(`col${column}_row${row}`).style.backgroundColor = cells === "R" ? "red" : cells === "G" ? "green" : "None";
-
+            document.getElementById(`col${column}_row${row}`).style.backgroundImage = cells === "R" ? `url(${gameData.alienImage})` : cells === "G" ? `url(${gameData.astroImage}) ` : "None";
         });
     });
 
@@ -382,8 +411,8 @@ const executeMove = (col) => {
     switchTokens();
 
     if (gameData.computerAI) {
-        setTimeout(updateBoard, 1000)
-        setTimeout(render, 3000)
+        setTimeout(() => updateBoard(), 1000)
+        setTimeout(() => render(), 2000)
     } else {
         setTimeout(updateBoard, 1000)
         render()
@@ -443,6 +472,7 @@ const checkForWinner = (row, col, simulated, simulatedToken) => {
         setTimeout(() => {
             winningCombos.forEach((ele) => {
                 document.getElementById(`col${ele[1]}_row${ele[0]}`).style.backgroundColor = "yellow";
+                document.getElementById(`col${ele[1]}_row${ele[0]}`).style.backgroundImage = token === "R" ? `url(${gameData.alienImage})` : `url(${gameData.astroImage})`;
             });
         }, 1000);
 
@@ -462,6 +492,9 @@ const switchTokens = () => {
     else {
         turn = "R"
     }
+    turnToken.style.backgroundColor = turn === "R" ? "red" : "green";
+    turnToken.style.backgroundImage = turn === "R" ? `url(${gameData.alienImage})` : `url(${gameData.astroImage})`;
+    turnToken.style.backgroundSize = "cover";
 
 };
 
@@ -505,6 +538,12 @@ const playSound = (id) => {
             tokenSound.currentTime = 1;
             tokenSound.play();
             break;
+        case 4:
+            winSound.currentTime = 1;
+            winSound.play();
+            break;
+
+
     }
 
 }
@@ -515,16 +554,25 @@ const readStorage = () => {
     } else {
         gameData.wins = localStorage.getItem("win");
     }
-    console.log(gameData)
+    updateWinText();
 }
 
-const updateStorage = () => {
+const updateWinText = () => {
+    winsText.innerText = gameData.wins;
+};
 
+const updateStorage = () => {
     readStorage()
     gameData.wins++
     localStorage.setItem("win", gameData.wins);
-    console.log(gameData)
+    updateWinText();
 }
+
+const clearWins = () => {
+    localStorage.setItem("win", 0);
+    gameData.wins = 0;
+    updateWinText();
+};
 
 // Initial fun function called upon selecting a board size, 
 // which will construct the grid of with empty strings,
@@ -534,12 +582,17 @@ const init = (rows, columns) => {
     constructGrid(rows, columns);
     constructDOMElements(rows, columns);
     turn = gameData.playerOneColor
-    readStorage();
+    winner = false;
+    tie = false;
+    allowMove = true;
     updateBoard();
-    
+    bottomOptions.style.display = 'flex'
 }
+readStorage();
 showScreen("Are you ready!", ['START GAME'], [], false, 1)
+
 /*----------------------------- Event Listeners -----------------------------*/
 boardElement.addEventListener('click', handleClick)
 screenElement.addEventListener('click', screensCallBack)
-
+clearBtn.addEventListener('click', clearWins)
+resetBtn.addEventListener('click', () => init(rows, columns))
