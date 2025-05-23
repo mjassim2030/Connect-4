@@ -27,7 +27,7 @@
     [ ] Instructions about how to play the game are included in your app.
     [X] Colors used on the site have appropriate contrast that meet the WCAG 2.0 level AA standard.
     [ ] All images on the site have alt text.
-    [ ] No text is placed on top of an image in a way that makes that text inaccessible.
+    [X] No text is placed on top of an image in a way that makes that text inaccessible.
 
 ## Git and GitHub Requirements
     [ ] You are shown as the only contributor to the project on GitHub.
@@ -114,14 +114,17 @@ const gameData = {
     playerTwoColor: "G",
     computerAI: false,
     difficulty: 'easy',
-    dropTokenFunction: ''
+    dropTokenFunction: '',
+    wins: 0
 }
 
 /*------------------------ Cached Element References ------------------------*/
 const boardElement = document.querySelector('.board');
 const screenElement = document.querySelector('.screen')
 const fallingTokens = document.getElementById("fallingTokens")
-
+const clickSound = document.getElementById("clickSound");
+const startSound = document.getElementById("startSound");
+const tokenSound = document.getElementById("tokenSound");
 
 /*-------------------------------- Variables --------------------------------*/
 let rows = 0;
@@ -143,7 +146,7 @@ const showScreen = (message, buttonsText, icons, timer, nextStep) => {
     if (buttonsText.length > 0) {
         screenContent = screenContent + `<div class="buttons">`
         buttonsText.forEach((buttonText, index) => {
-            screenContent = screenContent + (icons ? "" : `<img src="${icons[index]}/>`) + `<button class="options" id="${index}">${buttonText}</button>`
+            screenContent = screenContent + (icons ? "" : `<img src="${icons[index]}/>`) + `<button onclick="playSound(1)" class="options" id="${index}">${buttonText}</button>`
         });
         screenContent = screenContent + "</div>"
     }
@@ -159,7 +162,6 @@ const showScreen = (message, buttonsText, icons, timer, nextStep) => {
 
 }
 
-showScreen("Are you ready!", ['START GAME'], [], false, 1)
 
 const screensCallBack = (e) => {
 
@@ -197,6 +199,7 @@ const screensCallBack = (e) => {
             step = 0;
             screenElement.style.display = 'none'
             boardElement.style.display = 'flex';
+            playSound(2)
         }
     }
 
@@ -239,9 +242,13 @@ const render = () => {
     if (!tie && winner) {
         if (gameData.computerAI && gameData.playerOneColor === turn) {
             showScreen(`You are the Winner!`, [], [], true)
+            updateStorage()
         } else if (gameData.computerAI && gameData.playerTwoColor === turn)
             showScreen(`You Loose!`, [], [], true)
         else {
+            if (gameData.playerOneColor === turn) {
+                updateStorage()
+            }
             showScreen(`${turn} is a Winner!`, [], [], true)
         }
 
@@ -261,7 +268,7 @@ const dropToken = (column) => {
         //Check if the column has empty cells
         if (gameGrid[row][column] === "") {
             gameGrid[row][column] = turn
-
+            playSound(3);
             const locatedCell = document.getElementById(`col${column}_row${row}`);
             const topLevelRow = document.getElementById(`col${column}_row${0}`);
 
@@ -294,7 +301,6 @@ const dropToken = (column) => {
         }
     }
 };
-
 
 // Check if we have tie situation 
 // when all grid cells are filled with tokens with no winner
@@ -342,7 +348,7 @@ const dropTokenComputerNormalMode = () => {
     allowMove = false;
     // Try to win
     for (let col of availableColumns) {
-        if (simulateWin(col, gameData.playerTwoColor)) {
+        if (simulate(col, gameData.playerTwoColor)) {
             executeMove(col);
             return;
         }
@@ -350,7 +356,7 @@ const dropTokenComputerNormalMode = () => {
 
     // Block player
     for (let col of availableColumns) {
-        if (simulateWin(col, gameData.playerOneColor)) {
+        if (simulate(col, gameData.playerOneColor)) {
             executeMove(col);
             return;
         }
@@ -374,12 +380,18 @@ const executeMove = (col) => {
     checkForWinner(tokenRow, Number(col));
     checkTie();
     switchTokens();
-    setTimeout(updateBoard, 1000)
-    setTimeout(render, 3000)
+
+    if (gameData.computerAI) {
+        setTimeout(updateBoard, 1000)
+        setTimeout(render, 3000)
+    } else {
+        setTimeout(updateBoard, 1000)
+        render()
+    }
 
 };
 
-const simulateWin = (col, token) => {
+const simulate = (col, token) => {
     for (let row = rows - 1; row >= 0; row--) {
         if (gameGrid[row][col] === "") {
             return checkForWinner(row, col, true, token)
@@ -476,6 +488,44 @@ const handleClick = (e) => {
     }
 }
 
+const playSound = (id) => {
+
+    switch (id) {
+        case 1:
+            clickSound.currentTime = 0;
+            clickSound.volume = 0.8
+            clickSound.play();
+            break;
+        case 2:
+            startSound.currentTime = 0;
+            startSound.volume = 0.8
+            startSound.play();
+            break;
+        case 3:
+            tokenSound.currentTime = 1;
+            tokenSound.play();
+            break;
+    }
+
+}
+
+const readStorage = () => {
+    if (!localStorage.getItem("win")) {
+        localStorage.setItem("win", 0);
+    } else {
+        gameData.wins = localStorage.getItem("win");
+    }
+    console.log(gameData)
+}
+
+const updateStorage = () => {
+
+    readStorage()
+    gameData.wins++
+    localStorage.setItem("win", gameData.wins);
+    console.log(gameData)
+}
+
 // Initial fun function called upon selecting a board size, 
 // which will construct the grid of with empty strings,
 // and construct cells DOM elements on the HTML
@@ -484,9 +534,11 @@ const init = (rows, columns) => {
     constructGrid(rows, columns);
     constructDOMElements(rows, columns);
     turn = gameData.playerOneColor
+    readStorage();
     updateBoard();
+    
 }
-
+showScreen("Are you ready!", ['START GAME'], [], false, 1)
 /*----------------------------- Event Listeners -----------------------------*/
 boardElement.addEventListener('click', handleClick)
 screenElement.addEventListener('click', screensCallBack)

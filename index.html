@@ -14,27 +14,20 @@
 <body>
     <h1>Connect 4 Game</h1>
 
+    <audio id="clickSound" src="./assets/sounds/click.mp3" preload="auto"></audio>
+    <audio id="startSound" src="./assets/sounds/start.mp3" preload="auto"></audio>
+    <audio id="successSound" src="./assets/sounds/success.mp3" preload="auto"></audio>
+    <audio id="backSound" src="./assets/sounds/back.mp3" preload="auto"></audio>
+    <audio id="winSound" src="./assets/sounds/win.mp3" preload="auto"></audio>
+    <audio id="loseSound" src="./assets/sounds/lose.mp3" preload="auto"></audio>
+    <audio id="tieSound" src="./assets/sounds/tie.mp3" preload="auto"></audio>
+    <audio id="tokenSound" src="./assets/sounds/token.mp3" preload="auto"></audio>
 
-    <!-- Audio Tags -->
-    <!-- <audio src="./assets/cat.wav" id="catSound"></audio>
-    <audio src="./assets/dog.mp3" id="dogSound"></audio>
-    <audio src="./assets/backSound.mp3" loop id="backSound"></audio>
-    <audio src="./assets/success.mp3" id="success"></audio>
-    <audio src="./assets/tie.mp3" id="tie"></audio> -->
-
-
-    <div class="screen">
-
-    </div>
+    <div class="screen"></div>
     <div class="game">
-        <!-- <div class="sideColumn">
-            <h2 id="message">Message</h2>
-        </div> -->
-                    <div class="cell" id="fallingTokens" style="background-color: red;"></div>
 
-        <section class="board">
-
-        </section>
+        <div class="cell" id="fallingTokens" style="background-color: red;"></div>
+        <section class="board"></section>
 
         <!-- Reset Button -->
         <!-- <button id="reset">🔄️<br /><span class="label">Reset</span></button> -->

@@ -125,3 +125,16 @@ h1 {
     background-color: #00f0ff;
     color: #0d1b2a;
 }
+
+.winCounter {
+    margin-top: 1rem;
+    text-align: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
+}
+
+#clearWins {
+    margin-left: 1rem;
+    padding: 5px 10px;
+    cursor: pointer;
+}
