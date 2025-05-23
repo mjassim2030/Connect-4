@@ -4,7 +4,7 @@
 }
 
 body {
-    background: url('../assets/images/back.png');
+    background: url('https://mjassim2030.github.io/Connect-4/assets/images/back.png');
     background-size: cover;
     background-repeat: no-repeat;
     margin: 0;

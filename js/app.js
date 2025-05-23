@@ -116,8 +116,8 @@ const gameData = {
     difficulty: 'easy',
     dropTokenFunction: '',
     wins: 0,
-    alienImage: "../assets/images/alien.png",
-    astroImage: "../assets/images/astro.png"
+    alienImage: "https://mjassim2030.github.io/Connect-4/assets/images/alien.png",
+    astroImage: "https://mjassim2030.github.io/Connect-4/assets/images/astro.png"
 }
 
 /*------------------------ Cached Element References ------------------------*/
