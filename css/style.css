@@ -128,12 +128,34 @@ h1 {
 
 }
 
+
 .options:hover {
 
     background-color: #9103d7;
     color: #ffffff;
 }
 
+.backButton {
+    width: 5rem;
+    border-radius: 0.8rem;
+    padding: 10px;
+    cursor: pointer;
+    left: 5px;
+    top: 5px;
+    position: absolute;
+    color: #b92dff;
+    font-size: 1rem;
+    background-color: #0d1b2a;
+    transition: background-color 0.5s ease;
+    font-family: 'Orbitron', sans-serif;
+
+}
+
+.backButton:hover {
+
+    background-color: #9103d7;
+    color: #ffffff;
+}
 .colDiv{
     display: flex;
     flex-direction: row;

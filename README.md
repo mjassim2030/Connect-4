@@ -55,6 +55,46 @@ A playful and interactive web-based Connect 4 game with a space-themed twist, fe
     - **Easy:** Random column selection.
     - **Normal:** Tries to win or block opponent if none then random columns selection.
 
+## ⚙️ Code Functions
+#### 🎨 UI Functions
+- 🖥️ showScreen: Displays a screen with a message, buttons, icons, and optional timer for auto-hide.
+- 🔀 screenSelector: Manages transitions between setup screens based on user input.
+- 🧭 screensCallBack: Responds to user interactions and moves forward/backward through the screen flow.
+
+#### 🏗️ Constructor Functions
+- 📐 constructGrid: Creates a 2D array to represent the empty game board.
+- 🧱 constructDOMElements: Dynamically builds the HTML elements for the game grid.
+
+#### 🛠️ Utility Functions
+- 📊 getAvailableColumns: Returns a list of columns that still have space for a token.
+- ✅ validCell: Checks whether a given cell is within valid bounds.
+- 🎞️ animateTokensFalling: Animates the visual drop of a token into place.
+- 🔊 playSound: Plays sound effects for actions like click, start, drop, or win.
+- 💾 readStorage: Loads win count from localStorage if available.
+- 📝 updateWinText: Updates the UI text with the current number of wins.
+- 📈 updateStorage: Increases win count and stores it locally.
+- 🧹 clearWins: Resets the win count to zero and updates the UI.
+
+#### 🤖 Computer Moves Functions
+- 🧠 dropTokenComputerNormalMode: Attempts to win or block strategically, or plays randomly as fallback.
+- 🎲 dropTokenComputerEasyMode: Selects a move entirely at random.
+- ⚙️ executeMove: Runs the logic to place a token, check outcome, and refresh the board.
+- 🔍 simulate: Tests if a simulated move could result in a win.
+
+#### 🎮 Game Flow Functions
+- 🖼️ render: Displays outcome messages (Win/Lose/Tie) and updates score if needed.
+- ⬇️ dropToken: Finds the lowest available slot in a column to place the token.
+- 🤝 checkTie: Determines if the game ended in a tie by checking board fullness.
+- 🎨 updateBoard: Applies the token colors/images to the board.
+- 🏆 checkForWinner: Detects any winning combination of four aligned tokens.
+- 🔄 switchTokens: Switches to the next player's token.
+- 👆 handleClick: Processes a player’s click to initiate a move or AI response.
+- 🚀 init: Initializes the game board and resets state for a new game.
+
+## 📷 Screenshots
+![Screenshot 1](./assets/images/screenshots/screenshot1.png)
+![Screenshot 2](./assets/images/screenshots/screenshot2.png)
+
 ## 🎮 Demo
 Game Demo can be access by visiting this [link](https://mjassim2030.github.io/Connect-4/)
 

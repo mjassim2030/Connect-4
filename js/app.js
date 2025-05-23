@@ -127,7 +127,12 @@ const fallingTokens = document.getElementById("fallingTokens")
 const clickSound = document.getElementById("clickSound");
 const startSound = document.getElementById("startSound");
 const tokenSound = document.getElementById("tokenSound");
+const loseSound = document.getElementById("loseSound");
+// const tieSound
+// const backSound
+
 const winSound = document.getElementById("winSound");
+const backButton = document.getElementById("backButton")
 
 const winsText = document.getElementById("winsText");
 const clearBtn = document.getElementById("clearWins");
@@ -144,29 +149,24 @@ let tie = false;
 let step = 0;
 let allowMove = true
 let unlockNormalMode = 1;
-/*-------------------------------- Functions --------------------------------*/
+let screenSequence = []
 
+/*-------------------------------- UI Functions --------------------------------*/
 const showScreen = (message, buttonsText, icons, timer, nextStep) => {
     let screenContent = '';
     screenElement.style.display = 'flex'
     screenElement.innerHTML = "";
-    screenContent = `<p>${message}</p>`
+    screenContent = `<button class="backButton" id="backButton" ${nextStep <= 2 ? `hidden` : ""}>⬅️ Back</button><p>${message}</p>`
     if (buttonsText.length > 0) {
         screenContent = screenContent + `<div class="buttons">`
         buttonsText.forEach((buttonText, index) => {
             if (gameData.computerAI && step === 2 && index === 1 && Number(gameData.wins) < unlockNormalMode) {
                 let comments = `</br></br>You have to win ${unlockNormalMode} time in easy mode, or vs player to unlock Normal Difficulty`;
-                screenContent += `
-        <button class="options" disabled style="width: 200px;">
-            ${buttonText}
-            ${comments}
-        </button>`;
+                screenContent += `<button class="options" disabled style="width: 200px;">${buttonText}${comments}</button>`;
             } else {
-                screenContent += `
-        <button onclick="playSound(1)" class="options" id="${index}">
-            ${icons.length > 0 ? `<img class="options2" src="${icons[index]}" style="width: 4rem;"/>` : ''}
-            ${buttonText}
-        </button>`;
+                screenContent += `<button onclick="playSound(1)" class="options" id="${index}">
+            ${icons.length > 0 ? `<img class="options2" src="${icons[index]}" style="width: 4rem;" alt="Button Icon"/>` : ''}
+            ${buttonText}</button>`;
             }
         });
         screenContent = screenContent + "</div>"
@@ -181,39 +181,43 @@ const showScreen = (message, buttonsText, icons, timer, nextStep) => {
         }, 3000)
     }
 
-
 }
 
-
-const screensCallBack = (e) => {
-
-    if (e.target.classList.contains("options") || e.target.classList.contains("options2")) {
-        if (step === 1) {
+const screenSelector = (id, targetID, back) => {
+    switch (id) {
+        case 1:
             showScreen("Select your Game Mode", ['Player vs Player', 'Player vs Computer'], [], false, 2)
-        }
-        else if (step === 2) {
-            gameData.computerAI = (e.target.id === '1')
+            break;
+        case 2:
+            if (!back) gameData.computerAI = (targetID.id === '1')
             if (gameData.computerAI) {
                 showScreen("Choose Diffculty Level", ['Easy Mode', 'Normal Mode'], [], false, 3)
             } else {
                 showScreen("Select Board Size", ['4x5', '5x6', '6x7', '7x8'], [], false, 4)
             }
-        } else if (step === 3) {
-            if (e.target.id === '0') {
-                gameData.difficulty = 'easy'
-                gameData.dropTokenFunction = dropTokenComputerEasyMode
-            } else {
-                gameData.difficulty = 'normal'
-                gameData.dropTokenFunction = dropTokenComputerNormalMode
+            break;
+        case 3:
+            if (!back) {
+                if (targetID.id === '0') {
+                    gameData.difficulty = 'easy'
+                    gameData.dropTokenFunction = dropTokenComputerEasyMode
+                } else {
+                    gameData.difficulty = 'normal'
+                    gameData.dropTokenFunction = dropTokenComputerNormalMode
+                }
+                step++;
             }
-            step++;
             showScreen("Select Board Size", ['4x5', '5x6', '6x7', '7x8'], [], false, 4)
-        } else if (step === 4) {
-            gameData.boardSize.push(e.target.innerText.split("x")[0], e.target.innerText.split("x")[1])
-            step++;
+            break;
+        case 4:
+            if (!back) {
+                gameData.boardSize = [targetID.innerText.split("x")[0], targetID.innerText.split("x")[1]]
+                step++;
+            }
             showScreen("Are you with us or with the Aliens!?", ['Aliens', 'Astrounts'], [gameData.alienImage, gameData.astroImage], false, 5)
-        } else if (step === 5) {
-            gameData.playerOneColor = e.target.innerText === "Aliens" ? "R" : "G";
+            break;
+        case 5:
+            gameData.playerOneColor = targetID.innerText === "Aliens" ? "R" : "G";
             gameData.playerTwoColor = gameData.playerOneColor === "R" ? "G" : "R";
             console.log(gameData.playerOneColor)
 
@@ -224,11 +228,24 @@ const screensCallBack = (e) => {
             screenElement.style.display = 'none'
             boardElement.style.display = 'flex';
             playSound(2)
-        }
     }
+}
+const screensCallBack = (e) => {
 
+    if (e.target.classList.contains("backButton") && screenSequence.length > 0) {
+        screenSequence.pop()
+
+        screenSelector(screenSequence[screenSequence.length - 1], e.target, true)
+        console.log(step)
+    }
+    if (e.target.classList.contains("options") || e.target.classList.contains("options2")) {
+        screenSequence.push(step)
+        screenSelector(step, e.target, false)
+    }
 };
 
+
+/*-------------------------------- Constructor Functions --------------------------------*/
 // Construct grid of rows and columns with empty strings
 const constructGrid = (rows, columns) => {
     let emptyRow = [];
@@ -260,33 +277,185 @@ const constructDOMElements = (rows, columns) => {
 
 };
 
+
+/*-------------------------------- Utility Functions --------------------------------*/
+const getAvailableColumns = () => {
+    const cols = [];
+    for (let col = 0; col < columns; col++) {
+        if (gameGrid[0][col] === "") {
+            cols.push(col);
+        }
+    }
+    return cols;
+};
+
+// Check if the cell is valid in the grid rows and columns
+const validCell = (r, c) =>
+    r >= 0 && r < rows && c >= 0 && c < columns;
+
+const animateTokensFalling = (row, column) => {
+    playSound(3);
+    const locatedCell = document.getElementById(`col${column}_row${row}`);
+    const topLevelRow = document.getElementById(`col${column}_row${0}`);
+    const locatedRect = locatedCell.getBoundingClientRect();
+    const topCellRect = topLevelRow.getBoundingClientRect();
+    fallingTokens.style.backgroundColor = turn === "R" ? "red" : "green";
+    fallingTokens.background = ''
+    fallingTokens.style.width = `${locatedRect.width - 5}px`;
+    fallingTokens.style.height = `${locatedRect.height - 5}px`;
+    fallingTokens.style.backgroundSize = "cover";
+    fallingTokens.style.backgroundImage = turn === "R" ? `url(${gameData.alienImage})` : `url(${gameData.astroImage})`
+    fallingTokens.style.display = 'flex';
+    fallingTokens.style.top = `${topCellRect.top + window.screenY}px`;
+    fallingTokens.style.left = `${locatedRect.left + window.scrollX}px`;
+
+    setTimeout(() => {
+        fallingTokens.style.top = `${locatedRect.top + window.scrollY}px`;
+
+    }, 100)
+
+    setTimeout(() => {
+        fallingTokens.style.top = 0;
+        fallingTokens.style.display = 'none';
+    }, 1000)
+};
+
+const playSound = (id) => {
+
+    switch (id) {
+        case 1:
+            clickSound.currentTime = 0;
+            clickSound.volume = 0.8
+            clickSound.play();
+            break;
+        case 2:
+            startSound.currentTime = 0;
+            startSound.volume = 0.8
+            startSound.play();
+            break;
+        case 3:
+            tokenSound.currentTime = 1;
+            tokenSound.play();
+            break;
+        case 4:
+            winSound.currentTime = 0;
+            winSound.play();
+            break;
+        case 5:
+            loseSound.currentTime = 0;
+            loseSound.play();
+            break;
+    }
+
+}
+
+const readStorage = () => {
+    if (!localStorage.getItem("win")) {
+        localStorage.setItem("win", 0);
+    } else {
+        gameData.wins = localStorage.getItem("win");
+    }
+    updateWinText();
+}
+
+const updateWinText = () => {
+    winsText.innerText = gameData.wins;
+};
+
+const updateStorage = () => {
+    readStorage()
+    gameData.wins++
+    localStorage.setItem("win", gameData.wins);
+    updateWinText();
+}
+
+const clearWins = () => {
+    localStorage.setItem("win", 0);
+    gameData.wins = 0;
+    updateWinText();
+};
+
+const executeMove = (col) => {
+    const tokenRow = dropToken(col);
+    checkForWinner(tokenRow, Number(col));
+    checkTie();
+    switchTokens();
+    setTimeout(() => updateBoard(), gameData.computerAI ? 1000 : 0)
+    setTimeout(render, gameData.computerAI ? 2000 : 0)
+};
+
+/*-------------------------------- Computer Moves Functions --------------------------------*/
+const dropTokenComputerNormalMode = () => {
+    const availableColumns = getAvailableColumns();
+    allowMove = false;
+    // Try to win
+    for (let col of availableColumns) {
+        if (simulate(col, gameData.playerTwoColor)) {
+            executeMove(col);
+            return;
+        }
+    }
+
+    // Block player
+    for (let col of availableColumns) {
+        if (simulate(col, gameData.playerOneColor)) {
+            executeMove(col);
+            return;
+        }
+    }
+
+    // Play Randomly
+    const randomColumn = availableColumns[Math.floor(Math.random() * availableColumns.length)];
+    executeMove(randomColumn);
+
+}
+
+const dropTokenComputerEasyMode = () => {
+    allowMove = false;
+    const availableColumns = getAvailableColumns();
+    const randomColumn = availableColumns[Math.floor(Math.random() * availableColumns.length)];
+    executeMove(randomColumn);
+}
+
+const simulate = (col, token) => {
+    for (let row = rows - 1; row >= 0; row--) {
+        if (gameGrid[row][col] === "") {
+            return checkForWinner(row, col, true, token)
+        }
+    }
+};
+
+/*-------------------------------- Game Flow Functions --------------------------------*/
 // Render messages on the UI
+
 const render = () => {
 
+if (!allowMove){
     if (!tie && winner) {
         if (gameData.computerAI && gameData.playerOneColor === turn) {
             playSound(4);
-            showScreen(`You are the Winner!`, [], [], true)
+            showScreen(`You are the Winner!`, [], [], true, 0)
             updateStorage()
-        } else if (gameData.computerAI && gameData.playerTwoColor === turn)
-            showScreen(`You Loose!`, [], [], true)
-        else {
+        } else if (gameData.computerAI && gameData.playerTwoColor === turn) {
+            playSound(5);
+            showScreen(`You Lose!`, [], [], true, 0);
+        } else {
             playSound(4);
             if (gameData.playerOneColor === turn) {
                 updateStorage()
             }
-            showScreen(`${turn} is a Winner!`, [], [], true)
+            showScreen(`${turn} is a Winner!`, [], [], true, 0)
         }
 
     } else if (tie && !winner) {
         showScreen(`It's a Tie!`, [], [], true)
     }
+}
     allowMove = true;
 
 }
 
-// This function triggered when the user drops a token (Clicking on one the columns)
-// To place a token (Red or Green)
+// When the user drops a token (Clicking on one of the columns to plave a token)
 const dropToken = (column) => {
 
     for (let row = gameGrid.length - 1; row >= 0; row--) {
@@ -294,38 +463,7 @@ const dropToken = (column) => {
         //Check if the column has empty cells
         if (gameGrid[row][column] === "") {
             gameGrid[row][column] = turn
-            playSound(3);
-            const locatedCell = document.getElementById(`col${column}_row${row}`);
-            const topLevelRow = document.getElementById(`col${column}_row${0}`);
-
-            const locatedRect = locatedCell.getBoundingClientRect();
-            const topCellRect = topLevelRow.getBoundingClientRect();
-
-            fallingTokens.style.backgroundColor = turn === "R" ? "red" : "green";
-            fallingTokens.background = ''
-            fallingTokens.style.width = `${locatedRect.width - 5}px`;
-            fallingTokens.style.height = `${locatedRect.height - 5}px`;
-            fallingTokens.style.backgroundSize = "cover";
-
-            fallingTokens.style.backgroundImage = turn === "R" ? `url(${gameData.alienImage})` : `url(${gameData.astroImage})`
-
-            fallingTokens.style.display = 'flex';
-
-            fallingTokens.style.top = `${topCellRect.top + window.screenY}px`;
-            fallingTokens.style.left = `${locatedRect.left + window.scrollX}px`;
-
-
-            setTimeout(() => {
-                fallingTokens.style.top = `${locatedRect.top + window.scrollY}px`;
-
-            }, 100)
-
-            setTimeout(() => {
-                // locatedCell.style.backgroundColor = turn === "R" ? "red" : "green";
-                fallingTokens.style.top = 0;
-                fallingTokens.style.display = 'none';
-            }, 1000)
-
+            animateTokensFalling(row, column)
             return row
         }
     }
@@ -359,79 +497,6 @@ const updateBoard = () => {
     });
 
 };
-
-const getAvailableColumns = () => {
-    const cols = [];
-    for (let col = 0; col < columns; col++) {
-        if (gameGrid[0][col] === "") {
-            cols.push(col);
-        }
-    }
-    return cols;
-};
-
-// -----------------------------------------------------------------
-
-const dropTokenComputerNormalMode = () => {
-    const availableColumns = getAvailableColumns();
-    allowMove = false;
-    // Try to win
-    for (let col of availableColumns) {
-        if (simulate(col, gameData.playerTwoColor)) {
-            executeMove(col);
-            return;
-        }
-    }
-
-    // Block player
-    for (let col of availableColumns) {
-        if (simulate(col, gameData.playerOneColor)) {
-            executeMove(col);
-            return;
-        }
-    }
-
-    // Play Randomly
-    const randomColumn = availableColumns[Math.floor(Math.random() * availableColumns.length)];
-    executeMove(randomColumn);
-
-}
-
-const dropTokenComputerEasyMode = () => {
-    allowMove = false;
-    const availableColumns = getAvailableColumns();
-    const randomColumn = availableColumns[Math.floor(Math.random() * availableColumns.length)];
-    executeMove(randomColumn);
-}
-
-const executeMove = (col) => {
-    const tokenRow = dropToken(col);
-    checkForWinner(tokenRow, Number(col));
-    checkTie();
-    switchTokens();
-
-    if (gameData.computerAI) {
-        setTimeout(() => updateBoard(), 1000)
-        setTimeout(() => render(), 2000)
-    } else {
-        setTimeout(updateBoard, 1000)
-        render()
-    }
-
-};
-
-const simulate = (col, token) => {
-    for (let row = rows - 1; row >= 0; row--) {
-        if (gameGrid[row][col] === "") {
-            return checkForWinner(row, col, true, token)
-        }
-    }
-};
-//---------------------------------------------------------------------
-
-// Check if the cell is valid in the grid rows and columns
-const validCell = (r, c) =>
-    r >= 0 && r < rows && c >= 0 && c < columns;
 
 // Check for winner by finding 4 in row simmilar tokens, either horizontally
 // Verticall, or Diagonaly
@@ -478,8 +543,6 @@ const checkForWinner = (row, col, simulated, simulatedToken) => {
 
     }
 
-
-
 };
 
 // Switch token colors for next player move
@@ -495,7 +558,6 @@ const switchTokens = () => {
     turnToken.style.backgroundColor = turn === "R" ? "red" : "green";
     turnToken.style.backgroundImage = turn === "R" ? `url(${gameData.alienImage})` : `url(${gameData.astroImage})`;
     turnToken.style.backgroundSize = "cover";
-
 };
 
 // Callback Function called when a column or cell is clicked
@@ -510,69 +572,20 @@ const handleClick = (e) => {
     } else if (e.target.parentElement.classList.contains("column")) {
         tokenColumn = e.target.parentElement.classList[1].slice(3)
     }
-    if (tokenColumn) {
+    if (tokenColumn && getAvailableColumns().includes(Number(tokenColumn))) {
 
         executeMove(tokenColumn)
 
-        if (gameData.computerAI && !winner && !tie && turn === gameData.playerTwoColor) {
-            setTimeout(gameData.dropTokenFunction, 1500)
-        }
+        setTimeout(() => {
+            if (gameData.computerAI && !winner && !tie && turn === gameData.playerTwoColor) {
+                gameData.dropTokenFunction();
+            }
+        }, 1500);
 
-    }
-}
-
-const playSound = (id) => {
-
-    switch (id) {
-        case 1:
-            clickSound.currentTime = 0;
-            clickSound.volume = 0.8
-            clickSound.play();
-            break;
-        case 2:
-            startSound.currentTime = 0;
-            startSound.volume = 0.8
-            startSound.play();
-            break;
-        case 3:
-            tokenSound.currentTime = 1;
-            tokenSound.play();
-            break;
-        case 4:
-            winSound.currentTime = 1;
-            winSound.play();
-            break;
-
-
-    }
-
-}
-
-const readStorage = () => {
-    if (!localStorage.getItem("win")) {
-        localStorage.setItem("win", 0);
     } else {
-        gameData.wins = localStorage.getItem("win");
+        allowMove = true
     }
-    updateWinText();
 }
-
-const updateWinText = () => {
-    winsText.innerText = gameData.wins;
-};
-
-const updateStorage = () => {
-    readStorage()
-    gameData.wins++
-    localStorage.setItem("win", gameData.wins);
-    updateWinText();
-}
-
-const clearWins = () => {
-    localStorage.setItem("win", 0);
-    gameData.wins = 0;
-    updateWinText();
-};
 
 // Initial fun function called upon selecting a board size, 
 // which will construct the grid of with empty strings,
