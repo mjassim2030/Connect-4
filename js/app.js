@@ -113,12 +113,13 @@ const gameData = {
     playerOneColor: 'R',
     playerTwoColor: "G",
     computerAI: false,
+    difficulty: 'easy'
 }
 
 /*------------------------ Cached Element References ------------------------*/
 const boardElement = document.querySelector('.board');
 const screenElement = document.querySelector('.screen')
-const animatedRedElement = document.getElementById("animatedRed")
+const fallingTokens = document.getElementById("fallingTokens")
 
 
 /*-------------------------------- Variables --------------------------------*/
@@ -133,7 +134,7 @@ let step = 0;
 
 /*-------------------------------- Functions --------------------------------*/
 
-const showScreen = (message, buttonsText, icons, timer) => {
+const showScreen = (message, buttonsText, icons, timer, nextStep) => {
     let screenContent = '';
     screenElement.style.display = 'flex'
     screenElement.innerHTML = "";
@@ -153,26 +154,35 @@ const showScreen = (message, buttonsText, icons, timer) => {
         }, 3000)
     }
 
+    step = nextStep
+
 }
 
-showScreen("Are you ready!", ['START GAME'], [], false)
+showScreen("Are you ready!", ['START GAME'], [], false, 1)
 
 const screensCallBack = (e) => {
 
+    // console.log(step)
     if (e.target.classList.contains("options")) {
-        if (step == 0) {
-            step++;
-            showScreen("Select your Game Mode", ['Player vs Player', 'Player vs Computer'], [], false)
-        }
         if (step === 1) {
+            showScreen("Select your Game Mode", ['Player vs Player', 'Player vs Computer'], [], false, 2)
+        }
+        else if (step === 2) {
             gameData.computerAI = (e.target.id === '1')
+            if (gameData.computerAI) {
+                showScreen("Choose Diffculty Level", ['Easy', 'Normal'], [], false, 3)
+            } else {
+                showScreen("Select Board Size", ['4x5', '5x6', '6x7', '7x8'], [], false, 4)
+            }
+        } else if (step === 3) {
+            gameData.difficulty = (e.target.id === '0' ? "easy" : "normal")
             step++;
-            showScreen("Select Board Size", ['4x5', '5x6', '6x7', '7x8'], [], false)
-        } else if (step === 2) {
+            showScreen("Select Board Size", ['4x5', '5x6', '6x7', '7x8'], [], false, 4)
+        } else if (step === 4) {
             gameData.baordSize.push(e.target.innerText.split("x")[0], e.target.innerText.split("x")[1])
             step++;
-            showScreen("Select your prefered token color", ['Red', 'Green'], [], false)
-        } else if (step === 3) {
+            showScreen("Select your prefered token color", ['Red', 'Green'], [], false, 5)
+        } else if (step === 5) {
             gameData.playerOneColor = e.target.innerText === "Red" ? "R" : "G";
             gameData.playerTwoColor = gameData.playerOneColor === "R" ? "G" : "R";
             rows = gameData.baordSize[0]
@@ -239,27 +249,31 @@ const dropToken = (column) => {
             gameGrid[row][column] = turn
 
             const locatedCell = document.getElementById(`col${column}_row${row}`);
-            const rect = locatedCell.getBoundingClientRect();
+            const topLevelRow = document.getElementById(`col${column}_row${0}`);
 
-            animatedRedElement.style.width = `${rect.width}px`;
-            animatedRedElement.style.height = `${rect.height}px`;
+            const locatedRect = locatedCell.getBoundingClientRect();
+            const topCellRect = topLevelRow.getBoundingClientRect();
 
-            animatedRedElement.style.display = 'flex';
+            fallingTokens.style.backgroundColor = turn === "R" ? "red" : "green";
 
-            animatedRedElement.style.top = 0;
-            animatedRedElement.style.left = `${rect.left + window.scrollX}px`;
+            fallingTokens.style.width = `${locatedRect.width - 5}px`;
+            fallingTokens.style.height = `${locatedRect.height - 5}px`;
+
+            fallingTokens.style.display = 'flex';
+
+            fallingTokens.style.top = `${topCellRect.top + window.screenY}px`;
+            fallingTokens.style.left = `${locatedRect.left + window.scrollX}px`;
 
 
             setTimeout(() => {
-
-                animatedRedElement.style.top = `${rect.top + window.scrollY}px`;
+                fallingTokens.style.top = `${locatedRect.top + window.scrollY}px`;
 
             }, 100)
 
             setTimeout(() => {
-                locatedCell.style.backgroundColor = turn === "R" ? "red" : "green";
-                animatedRedElement.style.top = 0;
-                animatedRedElement.style.display = 'none';
+                // locatedCell.style.backgroundColor = turn === "R" ? "red" : "green";
+                fallingTokens.style.top = 0;
+                fallingTokens.style.display = 'none';
             }, 1000)
 
 
@@ -326,86 +340,6 @@ const wouldWin = (col, token) => {
     return false;
 };
 
-// const dropTokenComputer = () => {
-//     const avaliableColumns = [];
-
-//     for (let col = 0; col < columns; col++) {
-//         if (gameGrid[0][col] === "") {
-//             avaliableColumns.push(col)
-//         }
-//     }
-
-//     if (avaliableColumns.length === 0) return;
-
-//     const randomColumn = avaliableColumns[Math.floor(Math.random() * avaliableColumns.length)];
-
-//     const tokenRow = dropToken(randomColumn);
-//     checkForWinner(tokenRow, randomColumn);
-//     checkTie()
-//     switchTokens()
-//     updateBoard();
-//     render();
-// }
-
-const checkWinSim = (row, col, token, grid) => {
-    for (let [dr, dc] of directions) {
-        let count = 1;
-
-        // Forward
-        for (let i = 1; i < 4; i++) {
-            const r = row + dr * i;
-            const c = col + dc * i;
-            if (!validCell(r, c) || grid[r][c] !== token) break;
-            count++;
-        }
-
-        // Backward
-        for (let i = 1; i < 4; i++) {
-            const r = row - dr * i;
-            const c = col - dc * i;
-            if (!validCell(r, c) || grid[r][c] !== token) break;
-            count++;
-        }
-
-        if (count >= 4) return true;
-    }
-
-    return false;
-};
-
-const executeComputerMove = (col) => {
-    const tokenRow = dropToken(col);
-    checkForWinner(tokenRow, col);
-    checkTie();
-    switchTokens();
-    updateBoard();
-    render();
-};
-
-const dropTokenComputer = () => {
-    const availableColumns = getAvailableColumns();
-
-    // 1. Try to win
-    for (let col of availableColumns) {
-        if (wouldWin(col, platerTwoColor)) {
-            executeComputerMove(col);
-            return;
-        }
-    }
-
-    // 2. Block player win
-    for (let col of availableColumns) {
-        if (wouldWin(col, playerOneColor)) {
-            executeComputerMove(col);
-            return;
-        }
-    }
-
-    // 3. Prefer center columns
-    const center = Math.floor(columns / 2);
-    const sortedCols = availableColumns.sort((a, b) => Math.abs(center - a) - Math.abs(center - b));
-    executeComputerMove(sortedCols[0]); // Best next move
-};
 //---------------------------------------------------------------------
 
 // Check if the cell is valid in the grid rows and columns
@@ -444,12 +378,15 @@ const checkForWinner = (row, col) => {
         }
     });
 
-    if (winningCombos.length >= 4) {
-        winner = true
-        winningCombos.forEach((ele) => {
-            document.getElementById(`col${ele[1]}_row${ele[0]}`).style.backgroundColor = "yellow";
-        });
-    }
+    setTimeout(() => {
+        if (winningCombos.length >= 4) {
+            winner = true
+            winningCombos.forEach((ele) => {
+                document.getElementById(`col${ele[1]}_row${ele[0]}`).style.backgroundColor = "yellow";
+            });
+        }
+    }, 1000);
+
 };
 
 
@@ -479,11 +416,12 @@ const handleClick = (e) => {
     if (tokenColumn) {
         const tokenRow = dropToken(tokenColumn)
 
+
         checkForWinner(tokenRow, Number(tokenColumn));
         checkTie()
         switchTokens()
-        updateBoard();
-        render();
+        setTimeout(updateBoard, 1000)
+        render()
 
         if (gameData.computerAI && !winner && !tie && turn === gameData.platerTwoColor) {
             setTimeout(dropTokenComputer, 500)
