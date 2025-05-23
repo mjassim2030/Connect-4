@@ -61,17 +61,17 @@
 
     # MVP
     [X] Ask user to choose board size
-    [ ] Choose Player vs Computer or Playre vs Player - will be skipped in the mean time.
+    [X] Choose Player vs Computer or Playre vs Player
     [X] Let the user choose color of token
     [X] initaite winner and tie variable as false
     [X] Winner is the first to have horizontal, vertical, or diagonal line of 4 tokens.
     [X] Check winner
     [X] Alternate turns
     [X] If all the game board is filled then its a tie
-    [ ] Skip non-Empty Columns
-    [ ] Clear Wining Combo
+    [X] Skip non-Empty Columns
+    [X] Clear Wining Combo
     [ ] Configure Back Sound
-    [ ] Render Messages
+    [X] Render Messages
     [ ] There should be a button to restart the game.
 
     # Level Ups
@@ -113,7 +113,8 @@ const gameData = {
     playerOneColor: 'R',
     playerTwoColor: "G",
     computerAI: false,
-    difficulty: 'easy'
+    difficulty: 'easy',
+    dropTokenFunction: ''
 }
 
 /*------------------------ Cached Element References ------------------------*/
@@ -131,7 +132,7 @@ let turn;
 let winner = false;
 let tie = false;
 let step = 0;
-
+let allowMove = true
 /*-------------------------------- Functions --------------------------------*/
 
 const showScreen = (message, buttonsText, icons, timer, nextStep) => {
@@ -162,7 +163,6 @@ showScreen("Are you ready!", ['START GAME'], [], false, 1)
 
 const screensCallBack = (e) => {
 
-    // console.log(step)
     if (e.target.classList.contains("options")) {
         if (step === 1) {
             showScreen("Select your Game Mode", ['Player vs Player', 'Player vs Computer'], [], false, 2)
@@ -175,7 +175,13 @@ const screensCallBack = (e) => {
                 showScreen("Select Board Size", ['4x5', '5x6', '6x7', '7x8'], [], false, 4)
             }
         } else if (step === 3) {
-            gameData.difficulty = (e.target.id === '0' ? "easy" : "normal")
+            if (e.target.id === '0') {
+                gameData.difficulty = 'easy'
+                gameData.dropTokenFunction = dropTokenComputerEasyMode
+            } else {
+                gameData.difficulty = 'normal'
+                gameData.dropTokenFunction = dropTokenComputerNormalMode
+            }
             step++;
             showScreen("Select Board Size", ['4x5', '5x6', '6x7', '7x8'], [], false, 4)
         } else if (step === 4) {
@@ -231,10 +237,18 @@ const constructDOMElements = (rows, columns) => {
 const render = () => {
 
     if (!tie && winner) {
-        showScreen(`${turn} is a Winner!`, [], [], true)
+        if (gameData.computerAI && gameData.playerOneColor === turn) {
+            showScreen(`You are the Winner!`, [], [], true)
+        } else if (gameData.computerAI && gameData.playerTwoColor === turn)
+            showScreen(`You Loose!`, [], [], true)
+        else {
+            showScreen(`${turn} is a Winner!`, [], [], true)
+        }
+
     } else if (tie && !winner) {
         showScreen(`It's a Tie!`, [], [], true)
     }
+    allowMove = true;
 
 }
 
@@ -275,9 +289,6 @@ const dropToken = (column) => {
                 fallingTokens.style.top = 0;
                 fallingTokens.style.display = 'none';
             }, 1000)
-
-
-
 
             return row
         }
@@ -325,21 +336,56 @@ const getAvailableColumns = () => {
 };
 
 // -----------------------------------------------------------------
-const wouldWin = (col, token) => {
-    // Copy grid
-    const tempGrid = gameGrid.map(row => [...row]);
 
-    // Drop the token in the simulated grid
-    for (let row = rows - 1; row >= 0; row--) {
-        if (tempGrid[row][col] === "") {
-            tempGrid[row][col] = token;
-            return checkWinSim(row, col, token, tempGrid);
+const dropTokenComputerNormalMode = () => {
+    const availableColumns = getAvailableColumns();
+    allowMove = false;
+    // Try to win
+    for (let col of availableColumns) {
+        if (simulateWin(col, gameData.playerTwoColor)) {
+            executeMove(col);
+            return;
         }
     }
 
-    return false;
+    // Block player
+    for (let col of availableColumns) {
+        if (simulateWin(col, gameData.playerOneColor)) {
+            executeMove(col);
+            return;
+        }
+    }
+
+    // Play Randomly
+    const randomColumn = availableColumns[Math.floor(Math.random() * availableColumns.length)];
+    executeMove(randomColumn);
+
+}
+
+const dropTokenComputerEasyMode = () => {
+    allowMove = false;
+    const availableColumns = getAvailableColumns();
+    const randomColumn = availableColumns[Math.floor(Math.random() * availableColumns.length)];
+    executeMove(randomColumn);
+}
+
+const executeMove = (col) => {
+    const tokenRow = dropToken(col);
+    checkForWinner(tokenRow, Number(col));
+    checkTie();
+    switchTokens();
+    setTimeout(updateBoard, 1000)
+    setTimeout(render, 3000)
+
 };
 
+const simulateWin = (col, token) => {
+    for (let row = rows - 1; row >= 0; row--) {
+        if (gameGrid[row][col] === "") {
+            return checkForWinner(row, col, true, token)
+        }
+    }
+};
 //---------------------------------------------------------------------
 
 // Check if the cell is valid in the grid rows and columns
@@ -348,8 +394,9 @@ const validCell = (r, c) =>
 
 // Check for winner by finding 4 in row simmilar tokens, either horizontally
 // Verticall, or Diagonaly
-const checkForWinner = (row, col) => {
-    const token = gameGrid[row][col];
+const checkForWinner = (row, col, simulated, simulatedToken) => {
+
+    const token = simulatedToken ? simulatedToken : gameGrid[row][col];
 
     let winningCombos = [];
 
@@ -378,17 +425,20 @@ const checkForWinner = (row, col) => {
         }
     });
 
-    setTimeout(() => {
-        if (winningCombos.length >= 4) {
-            winner = true
+    if (simulated && winningCombos.length >= 4) return true;
+    if (winningCombos.length >= 4) {
+        winner = true
+        setTimeout(() => {
             winningCombos.forEach((ele) => {
                 document.getElementById(`col${ele[1]}_row${ele[0]}`).style.backgroundColor = "yellow";
             });
-        }
-    }, 1000);
+        }, 1000);
+
+    }
+
+
 
 };
-
 
 // Switch token colors for next player move
 const switchTokens = () => {
@@ -405,6 +455,8 @@ const switchTokens = () => {
 
 // Callback Function called when a column or cell is clicked
 const handleClick = (e) => {
+    if (winner || !allowMove) return
+    allowMove = false;
 
     let tokenColumn = null;
 
@@ -414,18 +466,13 @@ const handleClick = (e) => {
         tokenColumn = e.target.parentElement.classList[1].slice(3)
     }
     if (tokenColumn) {
-        const tokenRow = dropToken(tokenColumn)
 
+        executeMove(tokenColumn)
 
-        checkForWinner(tokenRow, Number(tokenColumn));
-        checkTie()
-        switchTokens()
-        setTimeout(updateBoard, 1000)
-        render()
-
-        if (gameData.computerAI && !winner && !tie && turn === gameData.platerTwoColor) {
-            setTimeout(dropTokenComputer, 500)
+        if (gameData.computerAI && !winner && !tie && turn === gameData.playerTwoColor) {
+            setTimeout(gameData.dropTokenFunction, 1500)
         }
+
     }
 }
 
@@ -443,11 +490,4 @@ const init = (rows, columns) => {
 /*----------------------------- Event Listeners -----------------------------*/
 boardElement.addEventListener('click', handleClick)
 screenElement.addEventListener('click', screensCallBack)
-
-// boardSizeElement.forEach(element => { element.addEventListener('click', selectBoardSize) });
-// redTokenElement.addEventListener('click', selectTokenColor)
-// greenTokenElement.addEventListener('click', selectTokenColor)
-// versusPlayerElement.addEventListener('click', selectGameMode)
-// versusComputerElement.addEventListener('click', selectGameMode)
-
 
