@@ -6,7 +6,7 @@
     [X] Render the game in the browser using the DOM manipulation techniques demonstrated in lecture.
     [X] Include win/loss logic and render win/loss messages in HTML. The game you chose must have a win/lose condition.
     [X] Include separate HTML, CSS, JavaScript, and JavaScript data files organized in an appropriate file structure.
-    [ ] Include all required features specific to your game as defined in the Required
+    [X] Include all required features specific to your game as defined in the Required
         Features column in the table in the Recommended games document, or as
         discussed with your instructor if doing a custom game.
     [ ] The game is deployed online so the rest of the world can play it.
@@ -380,8 +380,8 @@ const executeMove = (col) => {
     checkForWinner(tokenRow, Number(col));
     checkTie();
     switchTokens();
-    setTimeout(() => updateBoard(), gameData.computerAI ? 1000 : 0)
-    setTimeout(render, gameData.computerAI ? 2000 : 0)
+    setTimeout(() => updateBoard(), 1000)
+    setTimeout(() => render(), gameData.computerAI ? 2000 : 0)
 };
 
 /*-------------------------------- Computer Moves Functions --------------------------------*/
