@@ -128,12 +128,10 @@ const clickSound = document.getElementById("clickSound");
 const startSound = document.getElementById("startSound");
 const tokenSound = document.getElementById("tokenSound");
 const loseSound = document.getElementById("loseSound");
-// const tieSound
-// const backSound
-
+const tieSound = document.getElementById("tieSound");
+const backSound = document.getElementById("backSound");
 const winSound = document.getElementById("winSound");
 const backButton = document.getElementById("backButton")
-
 const winsText = document.getElementById("winsText");
 const clearBtn = document.getElementById("clearWins");
 const howToElement = document.getElementById("howTo");
@@ -141,6 +139,7 @@ const bottomOptions = document.querySelector(".bottomOptions");
 const resetBtn = document.getElementById('reset')
 const newGameElement = document.getElementById('newGame')
 const headerElement = document.querySelector('.header')
+
 /*-------------------------------- Variables --------------------------------*/
 let rows = 0;
 let columns = 0;
@@ -382,27 +381,40 @@ const animateTokensFalling = (row, column) => {
 const playSound = (id) => {
 
     switch (id) {
+        case 0:
+            backSound.currentTime = 0;
+            backSound.volume = 0.3
+            backSound.play();
+            break;
         case 1:
             clickSound.currentTime = 0;
-            clickSound.volume = 0.8
+            clickSound.volume = 0.1
             clickSound.play();
             break;
         case 2:
             startSound.currentTime = 0;
-            startSound.volume = 0.8
+            startSound.volume = 0.7
             startSound.play();
             break;
         case 3:
-            tokenSound.currentTime = 1;
+            tokenSound.currentTime = 0
+            tokenSound.volume = 0.8
             tokenSound.play();
             break;
         case 4:
             winSound.currentTime = 0;
+            winSound.volume = 0.8
             winSound.play();
             break;
         case 5:
             loseSound.currentTime = 0;
+            loseSound.volume = 0.8
             loseSound.play();
+            break;
+        case 6:
+            tieSound.currentTime = 0;
+            tieSound.volume = 0.8
+            tieSound.play();
             break;
     }
 
@@ -441,7 +453,7 @@ const executeMove = (col) => {
     checkTie();
     switchTokens();
     setTimeout(() => updateBoard(), 1000)
-    setTimeout(() => render(), gameData.computerAI ? 2000 : 0)
+    setTimeout(() => render(), gameData.computerAI && !winner ? 2000 : winner || tie ? 1500 : 0)
 };
 
 /*-------------------------------- Computer Moves Functions --------------------------------*/
@@ -504,11 +516,12 @@ const render = () => {
                 if (gameData.playerOneColor === turn) {
                     updateStorage()
                 }
-                showScreen(`${turn} is a Winner!`, [], [], true, 0, 3000)
+                showScreen(`${['Aliens', 'Astrounts'][turn === "R" ? 0 : 1]} are the Winners!`, [], [], true, 0, 3000)
             }
 
         } else if (tie && !winner) {
-            showScreen(`It's a Tie!`, [], [], true, 3000)
+            playSound(6);
+            showScreen(`It's a Tie!`, [], [], true, 0, 3000)
         }
     }
     allowMove = true;
@@ -661,6 +674,7 @@ const init = (rows, columns) => {
     tie = false;
     allowMove = true
     updateBoard();
+    playSound(0);
 }
 
 const newGame = () => {
@@ -669,6 +683,7 @@ const newGame = () => {
     boardElement.style.display = 'none';
     bottomOptions.style.display = 'none';
     showScreen("Are you ready!", ['START GAME'], [], false, 1)
+    playSound(0);
 }
 
 newGame();
