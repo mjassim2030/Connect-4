@@ -27,8 +27,8 @@ const gameData = {
     difficulty: 'easy',
     dropTokenFunction: '',
     wins: 0,
-    alienImage: "../assets/images/alien.png",
-    astroImage: "../assets/images/astro.png"
+    alienImage: "./assets/images/alien.png",
+    astroImage: "./assets/images/astro.png"
 }
 
 /*------------------------ Cached Element References ------------------------*/
