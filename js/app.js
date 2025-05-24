@@ -1,92 +1,3 @@
-// # Connect 4 Game
-
-/* To Do
-
-## Technical Requirements - MVP
-    [X] Render the game in the browser using the DOM manipulation techniques demonstrated in lecture.
-    [X] Include win/loss logic and render win/loss messages in HTML. The game you chose must have a win/lose condition.
-    [X] Include separate HTML, CSS, JavaScript, and JavaScript data files organized in an appropriate file structure.
-    [X] Include all required features specific to your game as defined in the Required
-        Features column in the table in the Recommended games document, or as
-        discussed with your instructor if doing a custom game.
-    [X] The game is deployed online so the rest of the world can play it.
-
- ## Code Convention Requirements
-    [ ] The game can be played without encountering errors. No errors may be present in
-        the console in the browser.
-    [ ] The code in the app adheres to coding conventions covered in lessons, like using
-        plural names for arrays.
-    [ ] There is no remaining dead and/or commented out code or console logs outside of
-        a commented out Code Graveyard section of your code.
-    [X] The game may not utilize the prompt() or alert() methods.
-    [X] The game is coded using proper indentation.
-
-## UI/UX Requirements
-
-    [X] CSS Flexbox or Grid is used for page layout design
-    [ ] Instructions about how to play the game are included in your app.
-    [X] Colors used on the site have appropriate contrast that meet the WCAG 2.0 level AA standard.
-    [ ] All images on the site have alt text.
-    [X] No text is placed on top of an image in a way that makes that text inaccessible.
-
-## Git and GitHub Requirements
-    [ ] You are shown as the only contributor to the project on GitHub.
-    [ ] The GitHub repository used for the project is named appropriately. For example,
-        names like connect-four or adventure-game are appropriate names, whereas
-        game-project or ga-project are not. The repo must be publicly accessible.
-    [ ] Frequent commits dating back to the very beginning of the project. If you start over
-        with a new repo, do not delete the old one.
-    [ ] Commit messages should be descriptive of the work done in the commit.
-
-## README Requirements
-    [ ] Screenshot/Logo: A screenshot of your app or a logo.
-    [ ] Your game's name: Include a description of your game and what it does.
-        Background info about the game and why you chose it is a nice touch.
-    [ ] Getting started: Include a link to your deployed game and any instructions you
-        deem important. This should also contain a link to your planning materials.
-    [ ] Attributions: This section should include links to any external resources (such as
-        libraries or assets) you used to develop your application that require attribution.
-        You can exclude this section if it does not apply to your application.
-    [ ] Technologies Used: List of the technologies used, for example: JavaScript, HTML,
-        CSS, etc.
-    [ ] Next steps: Planned future enhancements (stretch goals).
-
-## Presentation Requirements
-    [ ] Present your project in front of the class on the scheduled presentation day.
-    [ ] The project you present is the project you were approved by your instructor to
-        build.
-
---------------------------------------------------
-
-
-    # MVP
-    [X] Ask user to choose board size
-    [X] Choose Player vs Computer or Playre vs Player
-    [X] Let the user choose color of token
-    [X] initaite winner and tie variable as false
-    [X] Winner is the first to have horizontal, vertical, or diagonal line of 4 tokens.
-    [X] Check winner
-    [X] Alternate turns
-    [X] If all the game board is filled then its a tie
-    [X] Skip non-Empty Columns
-    [X] Clear Wining Combo
-    [ ] Configure Back Sound
-    [X] Render Messages
-    [ ] There should be a button to restart the game.
-
-    # Level Ups
-    [ ] The game will have a counter of how many times each wins and when its a tie none will get a point.
-    [ ] There should be a button to "play another round", in that case the winning counter will keep adding.
-    [ ] Store Player Rounds in the browser using local storage
-
-    # Game Visuals
-    [ ] The game will have background sound playing in loop
-    [ ] Tokens will be animated when falling down into the selected column
-    [ ] Tokens will create sliding and hitting sounds effects
-    [ ] When we have the game mode (Player vs computer) then if the player looses then play loose sound, if player wins play winning sound.
-    [ ] There should be a visual animated pop up showing the final results (ex. Red (0) - Green (0))
-    [ ] The winning combination should be highlighted in different color.
-    */
 /*-------------------------------- Constants --------------------------------*/
 
 // Array to hold different board sizes by [row, column]
@@ -116,8 +27,8 @@ const gameData = {
     difficulty: 'easy',
     dropTokenFunction: '',
     wins: 0,
-    alienImage: "https://mjassim2030.github.io/Connect-4/assets/images/alien.png",
-    astroImage: "https://mjassim2030.github.io/Connect-4/assets/images/astro.png"
+    alienImage: "../assets/images/alien.png",
+    astroImage: "../assets/images/astro.png"
 }
 
 /*------------------------ Cached Element References ------------------------*/
@@ -228,6 +139,7 @@ const screenSelector = (id, targetID, back) => {
 
             turnToken.style.backgroundColor = gameData.playerOneColor === "R" ? "red" : "green";
             turnToken.style.backgroundImage = gameData.playerOneColor === "R" ? `url(${gameData.alienImage})` : `url(${gameData.astroImage})`;
+            turnToken.ariaLabel = 'Token Image';
             turnToken.style.backgroundSize = "cover";
 
             screenElement.style.display = 'none'
@@ -243,7 +155,6 @@ const screenSelector = (id, targetID, back) => {
             } else {
                 gameData.firstTime = false;
             }
-            console.log(localStorage.getItem("firstTime"))
             if (gameData.firstTime) {
                 howToScreen(1200);
             }
@@ -275,7 +186,7 @@ const howToScreen = (delay) => {
                     
                     <div style="display: flex; flex-direction: row;">
         
-                        ${`<div class="cell" style="background-color: ${gameData.playerOneColor === "R" ? "red" : "green"}; 
+                        ${`<div class="cell" ariaLabel="Token Image" style="background-color: ${gameData.playerOneColor === "R" ? "red" : "green"}; 
                         background-image: url(${gameData.playerOneColor === "R" ? gameData.alienImage : gameData.astroImage}); 
                         width: 4vw; aspect-ratio: 1/1;"></div>`.repeat(4)}
 
@@ -291,7 +202,6 @@ const screensCallBack = (e) => {
         screenSequence.pop()
 
         screenSelector(screenSequence[screenSequence.length - 1], e.target, true)
-        console.log(step)
     }
     if (e.target.classList.contains("options") || e.target.classList.contains("options2")) {
         if (step !== -1) screenSequence.push(step)
@@ -326,7 +236,7 @@ const constructDOMElements = (rows, columns) => {
 
         html += `<div class="column col${col}">`;
         for (let row = 0; row < rows; row++) {
-            html += `<div class="cell" id="col${col}_row${row}"></div>`
+            html += `<div ariaLabel="Token Image" class="cell" id="col${col}_row${row}"></div>`
         }
         html += "</div>"
         boardElement.innerHTML += html;
@@ -363,6 +273,7 @@ const animateTokensFalling = (row, column) => {
     fallingTokens.style.height = `${locatedRect.height - 5}px`;
     fallingTokens.style.backgroundSize = "cover";
     fallingTokens.style.backgroundImage = turn === "R" ? `url(${gameData.alienImage})` : `url(${gameData.astroImage})`
+    fallingTokens.ariaLabel = "Token Image"
     fallingTokens.style.display = 'flex';
     fallingTokens.style.top = `${topCellRect.top + window.screenY}px`;
     fallingTokens.style.left = `${locatedRect.left + window.scrollX}px`;
@@ -379,46 +290,53 @@ const animateTokensFalling = (row, column) => {
 };
 
 const playSound = (id) => {
-
+    let sound;
     switch (id) {
         case 0:
-            backSound.currentTime = 0;
-            backSound.volume = 0.3
-            backSound.play();
-            break;
+            sound = backSound
+            sound.currentTime = 0;
+            sound.volume = 0.3;
+            break
         case 1:
-            clickSound.currentTime = 0;
-            clickSound.volume = 0.1
-            clickSound.play();
+            sound = clickSound;
+            sound.currentTime = 0;
+            sound.volume = 0.2;
             break;
         case 2:
-            startSound.currentTime = 0;
-            startSound.volume = 0.7
-            startSound.play();
+            sound = startSound;
+            sound.currentTime = 0;
+            sound.volume = 0.7;
             break;
         case 3:
-            tokenSound.currentTime = 0
-            tokenSound.volume = 0.6
-            tokenSound.play();
+            sound = tokenSound;
+            sound.currentTime = 0;
+            sound.volume = 0.6;
             break;
         case 4:
-            winSound.currentTime = 0;
-            winSound.volume = 0.8
-            winSound.play();
+            sound = winSound;
+            sound.currentTime = 0;
+            sound.volume = 0.7;
             break;
         case 5:
-            loseSound.currentTime = 0;
-            loseSound.volume = 0.8
-            loseSound.play();
+            sound = loseSound;
+            sound.currentTime = 0;
+            sound.volume = 0.8;
             break;
         case 6:
-            tieSound.currentTime = 0;
-            tieSound.volume = 0.8
-            tieSound.play();
+            sound = tieSound;
+            sound.currentTime = 0;
+            sound.volume = 0.8;
             break;
+        default:
+            return;
     }
 
-}
+    try {
+        sound.play()
+    } catch (error) {
+        console.warn("Error attempting to play sound:", error);
+    }
+};
 
 const readStorage = () => {
     if (!localStorage.getItem("win")) {
@@ -499,7 +417,6 @@ const simulate = (col, token) => {
 
 /*-------------------------------- Game Flow Functions --------------------------------*/
 // Render messages on the UI
-
 const render = () => {
 
     if (!allowMove) {
@@ -669,7 +586,6 @@ const init = (rows, columns) => {
     constructGrid(rows, columns);
     constructDOMElements(rows, columns);
     turn = gameData.playerOneColor
-    console.log(turn)
     winner = false;
     tie = false;
     allowMove = true
@@ -683,7 +599,6 @@ const newGame = () => {
     boardElement.style.display = 'none';
     bottomOptions.style.display = 'none';
     showScreen("Are you ready!", ['START GAME'], [], false, 1)
-    playSound(0);
 }
 
 newGame();

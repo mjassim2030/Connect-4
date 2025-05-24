@@ -29,23 +29,36 @@ A playful and interactive web-based Connect 4 game with a space-themed twist, fe
 .
 ├── index.html
 ├── css/
-│ └── style.css
+│   └── style.css
 ├── js/
-│ └── app.js
+│   └── app.js
 ├── assets/
-│ ├── images/
-│ │ ├── alien.png
-│ │ └── astro.png
-│ └── sounds/
-│ ├── click.mp3
-│ ├── start.mp3
-│ ├── token.mp3
-│ ├── loose.mp3
-| ├── tie.mp3
-| ├── back.mp3
-│ └── win.mp3
+│   ├── images/
+│   │   ├── alien.png
+|   |   ├── astro.png
+|   |   ├── favicon.png
+|   |   ├── header.png
+│   │   └── back.png
+│   └── sounds/
+│       ├── click.mp3
+│       ├── start.mp3
+│       ├── token.mp3
+│       ├── loose.mp3
+|       ├── tie.mp3
+|       ├── back.mp3
+│       └── win.mp3
 └── README.md
 ```
+
+## 🧰 Technologies Used
+- ⚙️ JavaScript – game logic, AI behavior, DOM manipulation, and local storage handling
+- 🎨 HTML5 – Structure of the web page and interactive elements
+- 🖌️ CSS3 – Styling, and animations
+- 📦 LocalStorage API – Storage of win counts across sessions, and first run how-to information
+- 🔊 HTML5 Audio API – Integrated game sound effects for actions like click, win, and token drops
+- 🧪 Dynamic DOM Rendering – Game board is generated based on player-selected dimensions
+- 📐 Grid-Based Logic – Efficient token placement and win detection algorithms
+
 
 ## 🧠 Technical Highlights
 - **DOM construction:** Board and cells are generated based on selected board size.
@@ -92,9 +105,6 @@ A playful and interactive web-based Connect 4 game with a space-themed twist, fe
 - 🚀 init: Initializes the game board and resets state for a new game.
 
 ## 📷 Screenshots
-![Screenshot 1](./assets/images/screenshots/screenshot1.png)
-![Screenshot 2](./assets/images/screenshots/screenshot2.png)
-![Screenshot 3](./assets/images/screenshots/screenshot3.png)
 ![Screenshot 4](./assets/images/screenshots/screenshot4.png)
 
 ## 🎮 Demo
