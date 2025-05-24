@@ -73,7 +73,7 @@ const showScreen = (message, buttonsText, icons, timer, nextStep, delay) => {
     if (buttonsText.length > 0) {
         screenContent = screenContent + `<div class="buttons">`
         buttonsText.forEach((buttonText, index) => {
-            if (gameData.computerAI && step === 2 && index === 1 && Number(gameData.wins) < unlockNormalMode) {
+            if (gameData.computerAI && nextStep === 3 && index === 1 && Number(gameData.wins) < unlockNormalMode) {
                 let comments = `</br></br>You have to win ${unlockNormalMode} time in easy mode, or vs player to unlock Normal Difficulty`;
                 screenContent += `<button class="options" disabled style="width: 200px;">${buttonText}${comments}</button>`;
             } else {
