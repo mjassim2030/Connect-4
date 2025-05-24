@@ -9,7 +9,7 @@
     [X] Include all required features specific to your game as defined in the Required
         Features column in the table in the Recommended games document, or as
         discussed with your instructor if doing a custom game.
-    [ ] The game is deployed online so the rest of the world can play it.
+    [X] The game is deployed online so the rest of the world can play it.
 
  ## Code Convention Requirements
     [ ] The game can be played without encountering errors. No errors may be present in
@@ -18,12 +18,12 @@
         plural names for arrays.
     [ ] There is no remaining dead and/or commented out code or console logs outside of
         a commented out Code Graveyard section of your code.
-    [ ] The game may not utilize the prompt() or alert() methods.
-    [ ] The game is coded using proper indentation.
+    [X] The game may not utilize the prompt() or alert() methods.
+    [X] The game is coded using proper indentation.
 
 ## UI/UX Requirements
 
-    [X ] CSS Flexbox or Grid is used for page layout design
+    [X] CSS Flexbox or Grid is used for page layout design
     [ ] Instructions about how to play the game are included in your app.
     [X] Colors used on the site have appropriate contrast that meet the WCAG 2.0 level AA standard.
     [ ] All images on the site have alt text.
@@ -85,8 +85,7 @@
     [ ] Tokens will create sliding and hitting sounds effects
     [ ] When we have the game mode (Player vs computer) then if the player looses then play loose sound, if player wins play winning sound.
     [ ] There should be a visual animated pop up showing the final results (ex. Red (0) - Green (0))
-    [ ] The winning combination should be highlighted in different color, with swinging animation.
-    [ ] Dark mode
+    [ ] The winning combination should be highlighted in different color.
     */
 /*-------------------------------- Constants --------------------------------*/
 
@@ -109,6 +108,7 @@ const directions = [
 ];
 
 const gameData = {
+    firstTime: true,
     boardSize: [],
     playerOneColor: 'R',
     playerTwoColor: "G",
@@ -136,8 +136,11 @@ const backButton = document.getElementById("backButton")
 
 const winsText = document.getElementById("winsText");
 const clearBtn = document.getElementById("clearWins");
+const howToElement = document.getElementById("howTo");
 const bottomOptions = document.querySelector(".bottomOptions");
 const resetBtn = document.getElementById('reset')
+const newGameElement = document.getElementById('newGame')
+const headerElement = document.querySelector('.header')
 /*-------------------------------- Variables --------------------------------*/
 let rows = 0;
 let columns = 0;
@@ -147,12 +150,12 @@ let turn;
 let winner = false;
 let tie = false;
 let step = 0;
-let allowMove = true
+let allowMove = false
 let unlockNormalMode = 1;
 let screenSequence = []
 
 /*-------------------------------- UI Functions --------------------------------*/
-const showScreen = (message, buttonsText, icons, timer, nextStep) => {
+const showScreen = (message, buttonsText, icons, timer, nextStep, delay) => {
     let screenContent = '';
     screenElement.style.display = 'flex'
     screenElement.innerHTML = "";
@@ -178,7 +181,7 @@ const showScreen = (message, buttonsText, icons, timer, nextStep) => {
     if (timer) {
         setTimeout(() => {
             screenElement.style.display = 'none'
-        }, 3000)
+        }, delay)
     }
 
 }
@@ -217,19 +220,72 @@ const screenSelector = (id, targetID, back) => {
             showScreen("Are you with us or with the Aliens!?", ['Aliens', 'Astrounts'], [gameData.alienImage, gameData.astroImage], false, 5)
             break;
         case 5:
-            gameData.playerOneColor = targetID.innerText === "Aliens" ? "R" : "G";
+            gameData.playerOneColor = targetID.innerText.trim() === "Aliens" ? "R" : "G";
             gameData.playerTwoColor = gameData.playerOneColor === "R" ? "G" : "R";
-            console.log(gameData.playerOneColor)
-
             rows = gameData.boardSize[0]
             columns = gameData.boardSize[1]
             init(rows, columns);
             step = 0;
+
+            turnToken.style.backgroundColor = gameData.playerOneColor === "R" ? "red" : "green";
+            turnToken.style.backgroundImage = gameData.playerOneColor === "R" ? `url(${gameData.alienImage})` : `url(${gameData.astroImage})`;
+            turnToken.style.backgroundSize = "cover";
+
             screenElement.style.display = 'none'
+            headerElement.style.display = 'flex';
             boardElement.style.display = 'flex';
+            bottomOptions.style.display = 'flex';
+
             playSound(2)
+
+            if (!localStorage.getItem("firstTime") || localStorage.getItem("firstTime") == 0) {
+                localStorage.setItem("firstTime", 1);
+                gameData.firstTime = true;
+            } else {
+                gameData.firstTime = true;
+            }
+            console.log(localStorage.getItem("firstTime"))
+            if (gameData.firstTime) {
+                howToScreen(1200);
+            }
+            break;
+        case -1:
+            allowMove = true
+            screenElement.style.display = 'none'
+            break;
     }
 }
+
+const howToScreen = (delay) => {
+    allowMove = false
+
+    // How to play
+    setTimeout(() => {
+        showScreen(`
+                    How to Play
+                    </br>
+                    <small style="font-size: 1rem;"></br>
+                    When it's your turn, 
+                    Click on your desired column to drop your token.
+                    </small>
+                    
+                    <small style="font-size: 1rem;">
+                    To win, drop  <span style="font-size: 2rem; color: yellow;"> 4 </span> successive tokens 
+                    <span style="font-size: 2rem;"> ↔️ </span>Horizontally, <span style="font-size: 2rem;"> ↕️ </span>Vertically, or <span style="font-size: 2rem;"> ↙️↘️↗️↖️ </span>Diagonally
+                    </small>
+                    
+                    <div style="display: flex; flex-direction: row;">
+        
+                        ${`<div class="cell" style="background-color: ${gameData.playerOneColor === "R" ? "red" : "green"}; 
+                        background-image: url(${gameData.playerOneColor === "R" ? gameData.alienImage : gameData.astroImage}); 
+                        width: 4vw; aspect-ratio: 1/1;"></div>`.repeat(4)}
+
+                    </div>
+                    `, ["OK"], [gameData.playerOneColor === "R" ? gameData.alienImage : gameData.astroImage], false, -1, 0);
+
+    }, delay)
+};
+
 const screensCallBack = (e) => {
 
     if (e.target.classList.contains("backButton") && screenSequence.length > 0) {
@@ -239,8 +295,11 @@ const screensCallBack = (e) => {
         console.log(step)
     }
     if (e.target.classList.contains("options") || e.target.classList.contains("options2")) {
-        screenSequence.push(step)
-        screenSelector(step, e.target, false)
+        if (step !== -1) screenSequence.push(step)
+        if (e.target.classList.contains("options2"))
+            screenSelector(step, e.target.parentElement, false)
+        else
+            screenSelector(step, e.target, false)
     }
 };
 
@@ -371,6 +430,7 @@ const updateStorage = () => {
 
 const clearWins = () => {
     localStorage.setItem("win", 0);
+    localStorage.setItem("firstTime", 0);
     gameData.wins = 0;
     updateWinText();
 };
@@ -430,27 +490,27 @@ const simulate = (col, token) => {
 
 const render = () => {
 
-if (!allowMove){
-    if (!tie && winner) {
-        if (gameData.computerAI && gameData.playerOneColor === turn) {
-            playSound(4);
-            showScreen(`You are the Winner!`, [], [], true, 0)
-            updateStorage()
-        } else if (gameData.computerAI && gameData.playerTwoColor === turn) {
-            playSound(5);
-            showScreen(`You Lose!`, [], [], true, 0);
-        } else {
-            playSound(4);
-            if (gameData.playerOneColor === turn) {
+    if (!allowMove) {
+        if (!tie && winner) {
+            if (gameData.computerAI && gameData.playerOneColor === turn) {
+                playSound(4);
+                showScreen(`You are the Winner!`, [], [], true, 0, 3000)
                 updateStorage()
+            } else if (gameData.computerAI && gameData.playerTwoColor === turn) {
+                playSound(5);
+                showScreen(`You Lose!`, [], [], true, 0, 3000);
+            } else {
+                playSound(4);
+                if (gameData.playerOneColor === turn) {
+                    updateStorage()
+                }
+                showScreen(`${turn} is a Winner!`, [], [], true, 0, 3000)
             }
-            showScreen(`${turn} is a Winner!`, [], [], true, 0)
-        }
 
-    } else if (tie && !winner) {
-        showScreen(`It's a Tie!`, [], [], true)
+        } else if (tie && !winner) {
+            showScreen(`It's a Tie!`, [], [], true, 3000)
+        }
     }
-}
     allowMove = true;
 
 }
@@ -538,6 +598,7 @@ const checkForWinner = (row, col, simulated, simulatedToken) => {
             winningCombos.forEach((ele) => {
                 document.getElementById(`col${ele[1]}_row${ele[0]}`).style.backgroundColor = "yellow";
                 document.getElementById(`col${ele[1]}_row${ele[0]}`).style.backgroundImage = token === "R" ? `url(${gameData.alienImage})` : `url(${gameData.astroImage})`;
+                document.getElementById(`col${ele[1]}_row${ele[0]}`).classList.add('animate');
             });
         }, 1000);
 
@@ -595,17 +656,27 @@ const init = (rows, columns) => {
     constructGrid(rows, columns);
     constructDOMElements(rows, columns);
     turn = gameData.playerOneColor
+    console.log(turn)
     winner = false;
     tie = false;
-    allowMove = true;
+    allowMove = true
     updateBoard();
-    bottomOptions.style.display = 'flex'
 }
-readStorage();
-showScreen("Are you ready!", ['START GAME'], [], false, 1)
+
+const newGame = () => {
+    readStorage();
+    headerElement.style.display = 'none';
+    boardElement.style.display = 'none';
+    bottomOptions.style.display = 'none';
+    showScreen("Are you ready!", ['START GAME'], [], false, 1)
+}
+
+newGame();
 
 /*----------------------------- Event Listeners -----------------------------*/
 boardElement.addEventListener('click', handleClick)
 screenElement.addEventListener('click', screensCallBack)
 clearBtn.addEventListener('click', clearWins)
 resetBtn.addEventListener('click', () => init(rows, columns))
+howToElement.addEventListener('click', () => howToScreen(0))
+newGameElement.addEventListener('click', newGame)

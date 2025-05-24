@@ -16,7 +16,8 @@
 
     <audio id="clickSound" src="https://mjassim2030.github.io/Connect-4/assets/sounds/click.mp3" preload="auto"></audio>
     <audio id="startSound" src="https://mjassim2030.github.io/Connect-4/assets/sounds/start.mp3" preload="auto"></audio>
-    <audio id="successSound" src="https://mjassim2030.github.io/Connect-4/assets/sounds/success.mp3" preload="auto"></audio>
+    <audio id="successSound" src="https://mjassim2030.github.io/Connect-4/assets/sounds/success.mp3"
+        preload="auto"></audio>
     <audio id="backSound" src="https://mjassim2030.github.io/Connect-4/assets/sounds/back.mp3" preload="auto"></audio>
     <audio id="winSound" src="https://mjassim2030.github.io/Connect-4/assets/sounds/win.mp3" preload="auto"></audio>
     <audio id="loseSound" src="https://mjassim2030.github.io/Connect-4/assets/sounds/lose.mp3" preload="auto"></audio>
@@ -26,33 +27,33 @@
     <div class="screen">
     </div>
     <div class="game">
+        <div class="header">
+
+            <div class="row">
+                <div class="cell" id="winsText"
+                    style="display: flex; justify-content: center; align-items: center; padding: 10px; width: 1.5vw; height: 1.5vw; aspect-ratio: 1/1; font-size: 2rem;">
+                    0</div>
+                <span>Wins</span>
+            </div>
+            <div class="row">
+                <div class="cell" id="turnToken" style="background-color: red;width: 3vw; aspect-ratio: 1/1;"></div>
+                <span>Turn</span>
+            </div>
+
+        </div>
 
         <div class="cell" id="fallingTokens" style="background-color: red;"></div>
         <section class="board"></section>
-
-        <!-- Reset Button -->
 
         <div class="bottomOptions">
 
             <button class="options" id="clearWins"><span class="label">Clear Wins</span></button>
             <button class="options" id="reset"><span class="label">Reset Level</span></button>
-
-            <div class="colDiv">
-                <div id="winsText"
-                            style="display: flex; justify-content: center; align-items: center; padding: 10px; width: 2vw; aspect-ratio: 1/1; font-size: 2rem;">0</div>
-                <span>Wins</span>
-
-            </div>
-
-                <div class="cell" id="turnToken"
-                    style="background-color: red;width: 4vw; aspect-ratio: 1/1;"></div>
-                <span>Turn</span>
-
-            </div>
-
-
-
+            <button class="options" id="howTo"><span class="label">How to Play</span></button>
+            <button class="options" id="newGame"><span class="label">New Game</span></button>
         </div>
+
+    </div>
     </div>
 
 
