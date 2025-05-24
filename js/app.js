@@ -241,7 +241,7 @@ const screenSelector = (id, targetID, back) => {
                 localStorage.setItem("firstTime", 1);
                 gameData.firstTime = true;
             } else {
-                gameData.firstTime = true;
+                gameData.firstTime = false;
             }
             console.log(localStorage.getItem("firstTime"))
             if (gameData.firstTime) {
@@ -398,7 +398,7 @@ const playSound = (id) => {
             break;
         case 3:
             tokenSound.currentTime = 0
-            tokenSound.volume = 0.8
+            tokenSound.volume = 0.6
             tokenSound.play();
             break;
         case 4:

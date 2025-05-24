@@ -94,6 +94,8 @@ A playful and interactive web-based Connect 4 game with a space-themed twist, fe
 ## 📷 Screenshots
 ![Screenshot 1](./assets/images/screenshots/screenshot1.png)
 ![Screenshot 2](./assets/images/screenshots/screenshot2.png)
+![Screenshot 3](./assets/images/screenshots/screenshot3.png)
+![Screenshot 4](./assets/images/screenshots/screenshot4.png)
 
 ## 🎮 Demo
 Game Demo can be access by visiting this [link](https://mjassim2030.github.io/Connect-4/)
